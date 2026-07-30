@@ -60,11 +60,14 @@ const {
 
     {
       chrome && (
-        <footer class="site-footer meta">
-          <span>VIVIFYUX — TU AMOR HACIA LA WEB EN UN INSTANTE.</span>
-          <span>SCROLL: LENIS · GRILLA: GSAP · SITIO: ASTRO</span>
-          <span>2026</span>
-        </footer>
+        <div class="footer-reveal">
+          <slot name="pre-footer" />
+          <footer class="site-footer meta">
+            <span>VIVIFYUX — TU AMOR HACIA LA WEB EN UN INSTANTE.</span>
+            <span>SCROLL: LENIS · GRILLA: GSAP · SITIO: ASTRO</span>
+            <span>2026</span>
+          </footer>
+        </div>
       )
     }
 

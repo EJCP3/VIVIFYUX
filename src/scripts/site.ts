@@ -92,10 +92,11 @@ function setupWorks() {
   function measure() {
     const vh = stage!.clientHeight;
 
-    // la grilla está maquetada al tamaño final: el zoom va de --zoom0 a 1
+    // la grilla está maquetada al tamaño final: el zoom va de --zoom0 a --zoom1
     scaleFrom =
       parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zoom0')) || 0.45;
-    scaleTo = 1;
+    scaleTo =
+      parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zoom1')) || 0.72;
 
     const rowH = row0!.offsetHeight;
 
@@ -119,8 +120,9 @@ function setupWorks() {
     const topInicial = Math.max(24, vh - 10 - (heroH + rowH) * scaleFrom);
     shiftFrom = topInicial - vh / 2 + (contentH * scaleFrom) / 2;
 
-    // al final: esa misma fila queda centrada, ya a escala 1
-    shiftTo = scaleTo * (contentH / 2 - (heroH + rowH / 2));
+    // al final: centra entre las dos primeras filas para que ambas entren;
+    // el factor 1.08 añade margen para el nombre + categoría bajo la fila 2
+    shiftTo = scaleTo * (contentH / 2 - (heroH + rowH * 1.08));
 
     // el recorrido del zoom dura ~3 pantallas + la altura del sticky
     works!.style.height = `${Math.round(vh * 4)}px`;
@@ -388,6 +390,23 @@ function setupProjectView() {
   );
 }
 
+/* =========================================================
+   6. Footer reveal: mide el footer fijo y deja espacio en
+   main para que se descubra al final del scroll.
+   ========================================================= */
+function setupFooterReveal() {
+  const reveal = document.querySelector<HTMLElement>('.footer-reveal');
+  const main = document.querySelector<HTMLElement>('main');
+  if (!reveal || !main) return;
+
+  const sync = () => {
+    main.style.marginBottom = `${reveal.offsetHeight}px`;
+  };
+
+  sync();
+  window.addEventListener('resize', sync, { signal: abort!.signal });
+}
+
 export function initSite() {
   teardown();
   setupScroll();
@@ -399,5 +418,6 @@ export function initSite() {
   setupProgress();
   setupReveals();
   setupProjectView();
+  setupFooterReveal();
   ScrollTrigger.refresh();
 }

@@ -17,10 +17,11 @@
   --gap-section: clamp(64px, 9vw, 130px);
 
   /* La grilla se maqueta al tamaño FINAL del zoom (escala 1) y arranca
-     reducida a --zoom0. Así el estado en el que mirás la captura no tiene
-     ningún transform que la agrande: se pinta a resolución nativa.
+     reducida a --zoom0. --zoom1 es la escala final visible: menor a 1 para
+     que entren 2 filas completas en pantalla.
      Si cambiás --tile-w, actualizá el `sizes` de Tile.astro. */
   --zoom0: 0.45;
+  --zoom1: 0.65;
   --tile-w: 58vw;
   --tile-h: 36.25vw; /* 16:10 */
   /* lo que adentro del scaler se mide en px se divide por --zoom0 para que
@@ -55,6 +56,14 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* ---------- footer reveal: el contenido tapa al footer, que se descubre al final ---------- */
+
+main {
+  position: relative;
+  z-index: 1;
+  background: var(--bg);
 }
 
 img {
@@ -479,6 +488,21 @@ button {
   background: var(--ink);
   border-color: var(--ink);
   color: var(--bg);
+}
+
+/* ---------- footer reveal wrapper ---------- */
+
+.footer-reveal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  background: var(--bg);
+}
+
+.footer-reveal > .contact {
+  border-top: none;
 }
 
 .site-footer {
