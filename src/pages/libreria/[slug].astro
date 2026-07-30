@@ -1,0 +1,81 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const libs = (await getCollection('librerias')).sort((a, b) => a.data.orden - b.data.orden);
+
+  return libs.map((lib, i) => ({
+    params: { slug: lib.slug },
+    props: {
+      lib,
+      anterior: libs[(i - 1 + libs.length) % libs.length],
+      siguiente: libs[(i + 1) % libs.length],
+    },
+  }));
+}
+
+const { lib, anterior, siguiente } = Astro.props;
+const { nombre, claim, descripcion, url, npm, stack, categoria, imagen } = lib.data;
+---
+
+<Base title={`${nombre} — VivifyUX`} description={claim} chrome={false}>
+  <article class="project">
+    <div class="project__media">
+      <Image
+        src={imagen}
+        alt={`Captura del sitio de ${nombre}`}
+        widths={[720, 1200, 1800]}
+        sizes="(max-width: 900px) 100vw, 55vw"
+        transition:name={`cover-${lib.slug}`}
+      />
+    </div>
+
+    <div class="project__panel">
+      <a class="project__close" href="/" aria-label="Cerrar y volver al catálogo">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M1 1l14 14M15 1L1 15" stroke="currentColor" stroke-width="1.6"></path>
+        </svg>
+      </a>
+
+      <h1 class="project__title">{nombre}</h1>
+
+      <p class="project__claim">{claim}</p>
+      <p class="project__desc">{descripcion}</p>
+
+      <div>
+        <p class="meta" style="opacity:0.55;margin-bottom:12px;">TECNOLOGÍAS UTILIZADAS</p>
+        <div class="chips">
+          {stack.map((t) => <span class="chip">{t}</span>)}
+          <span class="chip">{categoria}</span>
+        </div>
+      </div>
+
+      <div class="project__rule"></div>
+
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;">
+        <a class="project__cta meta" href={url} target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M6 2H2v12h12v-4M10 2h4v4M14 2L7 9" stroke="currentColor" stroke-width="1.6"></path>
+          </svg>
+          VER SITIO
+        </a>
+        {npm && <code class="meta" style="opacity:0.6;">NPM I {npm.toUpperCase()}</code>}
+      </div>
+
+      <div class="project__rule"></div>
+
+      <nav class="project__nav">
+        <a class="side" href={`/libreria/${anterior.slug}/`}>
+          <span class="meta" style="opacity:0.55;">ANTERIOR</span>
+          <span class="name">← {anterior.data.nombre}</span>
+        </a>
+        <a class="side next" href={`/libreria/${siguiente.slug}/`}>
+          <span class="meta" style="opacity:0.55;">SIGUIENTE</span>
+          <span class="name">{siguiente.data.nombre} →</span>
+        </a>
+      </nav>
+    </div>
+  </article>
+</Base>

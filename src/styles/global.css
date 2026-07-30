@@ -1,0 +1,702 @@
+/* =========================================================
+   VivifyUX — sistema editorial monocromo
+   Blanco, negro, tipografía gigante vs. UI diminuta.
+   El único color de la pantalla lo ponen las imágenes.
+   ========================================================= */
+
+:root {
+  --bg: #ffffff;
+  --ink: #0a0a0a;
+  --ink-soft: #3a3a3a;
+  --line: #e7e7e7;
+
+  --font-display: "Bebas Neue", "Arial Narrow", sans-serif;
+  --font-body: "Nunito", -apple-system, "Segoe UI", sans-serif;
+
+  --pad: clamp(16px, 2.4vw, 40px);
+  --gap-section: clamp(64px, 9vw, 130px);
+
+  /* La grilla se maqueta al tamaño FINAL del zoom (escala 1) y arranca
+     reducida a --zoom0. Así el estado en el que mirás la captura no tiene
+     ningún transform que la agrande: se pinta a resolución nativa.
+     Si cambiás --tile-w, actualizá el `sizes` de Tile.astro. */
+  --zoom0: 0.45;
+  --tile-w: 58vw;
+  --tile-h: 36.25vw; /* 16:10 */
+  /* lo que adentro del scaler se mide en px se divide por --zoom0 para que
+     se vea del tamaño de siempre en el estado inicial */
+  --tile-gap: calc(8px / var(--zoom0));
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color-scheme: light;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 600;
+  line-height: 1.5;
+  /* clip y no hidden: hidden crearía un contenedor de scroll y rompería el sticky */
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+p,
+figure,
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* ---------- roles tipográficos ---------- */
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 0.84;
+  letter-spacing: -0.005em;
+}
+
+.meta {
+  font-family: var(--font-body);
+  font-size: clamp(10px, 0.74vw, 12px);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  line-height: 1.35;
+}
+
+.copy {
+  font-size: clamp(15px, 1.15vw, 18px);
+  font-weight: 500;
+  line-height: 1.45;
+  max-width: 62ch;
+}
+
+/* ---------- barra de progreso (efecto de tendencia a la meta) ---------- */
+
+.progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 70;
+  height: 2px;
+  pointer-events: none;
+}
+
+.progress span {
+  display: block;
+  height: 100%;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+/* pista de scroll: se apaga apenas empezás a bajar */
+.scroll-cue {
+  position: fixed;
+  left: 50%;
+  bottom: 12px;
+  z-index: 50;
+  transform: translateX(-50%);
+  mix-blend-mode: difference;
+  color: #fff;
+  pointer-events: none;
+}
+
+/* ---------- header ---------- */
+
+.site-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: var(--pad);
+  mix-blend-mode: difference;
+  color: #fff;
+  pointer-events: none;
+}
+
+.site-header a,
+.site-header .header-claim {
+  pointer-events: auto;
+}
+
+.site-header .brand {
+  justify-self: start;
+}
+
+.site-header .header-right {
+  text-align: right;
+  display: grid;
+  gap: 2px;
+}
+
+.header-claim {
+  max-width: 32ch;
+}
+
+/* ---------- capítulo de trabajos (el zoom-out) ---------- */
+
+.works {
+  position: relative;
+  /* recorrido del zoom; el JS lo recalcula según el viewport */
+  height: 420vh;
+}
+
+.works__stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow: hidden;
+}
+
+/* sin will-change: le pide al navegador que NO congele el rasterizado, que es
+   lo que dejaba las capturas pixeladas al agrandarlas */
+.works__scaler {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max-content;
+  transform-origin: 50% 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* slot-text impone line-height 1.3 en cada celda: acá manda la caja del título */
+.wordmark__text .char-slot {
+  line-height: inherit;
+}
+
+/* el © es de la marca: se va cuando el título rueda a otra palabra */
+.wordmark__c {
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+
+.wordmark__text.is-brand .wordmark__c {
+  opacity: 1;
+}
+
+/* la caja del título tiene alto fijo aunque el texto cambie de tamaño: las
+   frases entran más chicas que las palabras y las tarjetas no se mueven */
+.wordmark {
+  /* 33vw en pantalla al inicio; acá se escribe en espacio de contenido */
+  --wm-fs: calc(33vw / var(--zoom0));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(var(--wm-fs) * 0.9);
+  margin-bottom: calc(clamp(10px, 1.4vw, 26px) / var(--zoom0));
+}
+
+.wordmark__text {
+  position: relative;
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 400;
+  /* el tamaño final lo fija el JS por frase; esto es el techo */
+  font-size: var(--wm-fs);
+  /* la tinta de Bebas mide 0.71em: con 0.9 la celda del slot tiene margen para
+     el rebote de entrada sin que las letras se vean cortadas arriba o abajo */
+  line-height: 0.9;
+  letter-spacing: -0.012em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.wordmark__c {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.1em;
+  vertical-align: super;
+  letter-spacing: 0;
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tile-gap);
+}
+
+.row__track {
+  display: flex;
+  gap: var(--tile-gap);
+  width: max-content;
+}
+
+/* ---------- tarjeta de librería ---------- */
+
+.tile {
+  display: block;
+  width: var(--tile-w);
+  flex: 0 0 auto;
+}
+
+.tile__media {
+  position: relative;
+  width: 100%;
+  height: var(--tile-h);
+  overflow: hidden;
+  background: var(--line);
+}
+
+.tile__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 340ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.tile:hover .tile__media img {
+  transform: scale(1.04);
+}
+
+/* nombre y categoría juntos a la izquierda: con las tarjetas grandes,
+   separarlos a los extremos hacía que la categoría de una se leyera pegada al
+   nombre de la siguiente */
+.tile__meta {
+  display: flex;
+  align-items: baseline;
+  gap: calc(12px / var(--zoom0));
+  padding-top: calc(7px / var(--zoom0));
+}
+
+.tile__name {
+  font-size: calc(13px / var(--zoom0));
+  font-weight: 800;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.tile__cat {
+  font-size: calc(11px / var(--zoom0));
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0.55;
+}
+
+/* ---------- secciones de contenido ---------- */
+
+.section {
+  padding: var(--gap-section) var(--pad);
+  border-top: 1px solid var(--line);
+}
+
+.section__inner {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) 3fr;
+  gap: clamp(24px, 4vw, 64px);
+  align-items: start;
+}
+
+.section__title {
+  font-size: clamp(38px, 5vw, 72px);
+}
+
+.block + .block {
+  margin-top: var(--gap-section);
+}
+
+.stack-copy {
+  display: grid;
+  gap: 22px;
+}
+
+/* lista de técnicas */
+
+.list {
+  border-top: 1px solid var(--line);
+}
+
+.list__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--line);
+  transition: background-color 180ms ease, color 180ms ease, padding-left 220ms ease;
+}
+
+.list__row:hover {
+  background: var(--ink);
+  color: var(--bg);
+  padding-left: 14px;
+}
+
+.list__row .num {
+  opacity: 0.55;
+}
+
+/* leyes: la ley a la izquierda, lo que hace este sitio con ella a la derecha */
+
+.laws {
+  border-top: 1px solid var(--line);
+}
+
+.laws__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+  gap: 12px 28px;
+  align-items: baseline;
+  padding: 15px 4px;
+  border-bottom: 1px solid var(--line);
+  transition: background-color 180ms ease, color 180ms ease, padding-left 220ms ease;
+}
+
+.laws__row:hover {
+  background: var(--ink);
+  color: var(--bg);
+  padding-left: 14px;
+}
+
+.laws__how {
+  font-size: clamp(13px, 1vw, 16px);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.link {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* grilla de celdas (tecnologías) */
+
+.cells {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+
+.cells span {
+  padding: 13px 12px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.cells span:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+/* dos columnas de números */
+
+.counts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(24px, 4vw, 56px);
+}
+
+.counts__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+/* ---------- contacto ---------- */
+
+.contact {
+  padding: var(--gap-section) var(--pad) clamp(28px, 4vw, 56px);
+  border-top: 1px solid var(--line);
+  text-align: center;
+}
+
+.contact__display {
+  font-size: clamp(56px, 15vw, 240px);
+  display: inline-block;
+}
+
+.contact__lines {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  margin-top: 20px;
+}
+
+.pill {
+  display: inline-block;
+  margin-top: 28px;
+  padding: 13px 26px;
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+}
+
+.pill:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+}
+
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 28px;
+  padding: 16px var(--pad);
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- ficha de librería (vista de proyecto) ---------- */
+
+.project {
+  display: grid;
+  grid-template-columns: 55fr 45fr;
+  min-height: 100svh;
+}
+
+.project__media {
+  position: relative;
+  overflow: hidden;
+  background: var(--line);
+}
+
+.project__media img {
+  width: 100%;
+  height: 100%;
+  min-height: 100svh;
+  object-fit: cover;
+}
+
+.project__panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  padding: clamp(28px, 4.4vw, 76px);
+  background: #f4f4f2;
+  min-height: 100svh;
+}
+
+.project__close {
+  position: absolute;
+  top: clamp(16px, 2vw, 30px);
+  right: clamp(16px, 2vw, 30px);
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 100px;
+  background: #e6e6e3;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+.project__close:hover {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+.project__title {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: clamp(38px, 4.4vw, 68px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-top: clamp(24px, 6vw, 90px);
+}
+
+.project__claim {
+  font-size: clamp(15px, 1.2vw, 19px);
+  font-weight: 700;
+}
+
+.project__desc {
+  font-size: clamp(14px, 1.05vw, 17px);
+  font-weight: 500;
+  line-height: 1.5;
+  max-width: 46ch;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 7px 13px;
+  border-radius: 8px;
+  background: #e6e6e3;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.project__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  align-self: flex-start;
+  padding: 13px 22px;
+  border-radius: 100px;
+  background: var(--ink);
+  color: var(--bg);
+  transition: transform 200ms ease;
+}
+
+.project__cta:hover {
+  transform: translateY(-2px);
+}
+
+.project__rule {
+  height: 1px;
+  background: #dededa;
+}
+
+.project__nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: auto;
+}
+
+.project__nav .side {
+  display: grid;
+  gap: 6px;
+}
+
+.project__nav .side.next {
+  text-align: right;
+}
+
+.project__nav .name {
+  font-size: clamp(15px, 1.2vw, 19px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.project__nav a:hover .name {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 900px) {
+  :root {
+    --tile-w: 92vw;
+    --tile-h: 57.5vw;
+  }
+
+  .header-claim {
+    display: none;
+  }
+
+  .section__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .laws__row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .cells {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .counts {
+    grid-template-columns: 1fr;
+  }
+
+  .project {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
+  .project__media img,
+  .project__panel {
+    min-height: 0;
+  }
+
+  .project__media img {
+    height: 58svh;
+  }
+
+  .wordmark {
+    --wm-fs: calc(40vw / var(--zoom0));
+  }
+}
+
+/* ---------- view transitions ---------- */
+
+/* la imagen sobre la que se hace click viaja hasta la ficha;
+   el resto de la página hace un cross-fade corto por debajo */
+/* umbral de Doherty: por debajo de 400 ms nadie siente que está esperando */
+::view-transition-group(*) {
+  animation-duration: 380ms;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 260ms;
+}
+
+/* ---------- accesibilidad ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .tile:hover .tile__media img {
+    transform: none;
+  }
+}

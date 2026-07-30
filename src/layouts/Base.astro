@@ -1,0 +1,78 @@
+---
+import { ViewTransitions } from 'astro:transitions';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** el header/footer del sitio; la ficha de librería va a pantalla completa sin ellos */
+  chrome?: boolean;
+}
+
+const {
+  title = 'VivifyUX — directorio de librerías interactivas para la web',
+  description =
+    'Directorio curado de librerías de interacción para la web: scroll, texto, transiciones, efectos, sonido y motores de animación.',
+  chrome = true,
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="preconnect" href="https://api.fontshare.com" />
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://api.fontshare.com/v2/css?f[]=bebas-neue@400&f[]=nunito@400,500,600,700,800&display=swap"
+    />
+    <ViewTransitions />
+  </head>
+  <body>
+    {/* efecto de tendencia a la meta: cuánto falta para el final */}
+    <div class="progress" aria-hidden="true"><span></span></div>
+
+    {
+      chrome && (
+        <header class="site-header">
+          <a class="brand meta" href="/">
+            VIVIFYUX
+          </a>
+         
+          <div class="header-right meta">
+              <p class="header-claim meta">
+                DIRECTORIO DE LIBRERÍAS
+                <br />
+                DE INTERACTIVO PARA LA WEB.
+              </p>
+          </div>
+        </header>
+      )
+    }
+
+    <main>
+      <slot />
+    </main>
+
+    {
+      chrome && (
+        <footer class="site-footer meta">
+          <span>VIVIFYUX — TU AMOR HACIA LA WEB EN UN INSTANTE.</span>
+          <span>SCROLL: LENIS · GRILLA: GSAP · SITIO: ASTRO</span>
+          <span>2026</span>
+        </footer>
+      )
+    }
+
+    <script>
+      import { initSite } from '../scripts/site';
+
+      // con ViewTransitions, astro:page-load también dispara en la carga inicial
+      document.addEventListener('astro:page-load', initSite);
+    </script>
+  </body>
+</html>

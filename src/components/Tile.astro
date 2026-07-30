@@ -1,0 +1,33 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  slug: string;
+  nombre: string;
+  categoria: string;
+  imagen: ImageMetadata;
+}
+
+const { slug, nombre, categoria, imagen } = Astro.props;
+---
+
+<a class="tile" href={`/libreria/${slug}/`} data-vt={`cover-${slug}`}>
+  <div class="tile__media">
+    <!-- espejo de --tile-w en global.css: la tarjeta se maqueta al tamaño del
+         zoom final, así que el `sizes` es el real y no hay que inflarlo.
+         Calidad alta: son capturas de interfaz con texto chico, lo primero que
+         se ensucia al comprimir -->
+    <Image
+      src={imagen}
+      alt={`Captura del sitio de ${nombre}`}
+      widths={[600, 900, 1400, 1800]}
+      sizes="(max-width: 900px) 92vw, 58vw"
+      quality={88}
+    />
+  </div>
+  <div class="tile__meta">
+    <span class="tile__name">{nombre}</span>
+    <span class="tile__cat">../{categoria}</span>
+  </div>
+</a>
