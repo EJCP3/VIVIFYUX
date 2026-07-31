@@ -7,12 +7,13 @@ interface Props {
   nombre: string;
   categoria: string;
   imagen: ImageMetadata;
+  isCopy?: boolean;
 }
 
-const { slug, nombre, categoria, imagen } = Astro.props;
+const { slug, nombre, categoria, imagen, isCopy = false } = Astro.props;
 ---
 
-<a class="tile" href={`/libreria/${slug}/`} data-vt={`cover-${slug}`}>
+<a class="tile" href={`/libreria/${slug}/`} data-vt={`cover-${slug}`} data-copy={isCopy ? "true" : undefined}>
   <div class="tile__media">
     <!-- espejo de --tile-w en global.css: la tarjeta se maqueta al tamaño del
          zoom final, así que el `sizes` es el real y no hay que inflarlo.

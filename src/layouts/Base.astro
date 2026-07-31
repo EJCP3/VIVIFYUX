@@ -10,11 +10,13 @@ interface Props {
 }
 
 const {
-  title = 'VivifyUX — directorio de librerías interactivas para la web',
+  title = 'VivifyUX — Directorio de librerías web interactivas',
   description =
     'Directorio curado de librerías de interacción para la web: scroll, texto, transiciones, efectos, sonido y motores de animación.',
   chrome = true,
 } = Astro.props;
+
+const anio = new Date().getFullYear();
 ---
 
 <!doctype html>
@@ -45,10 +47,9 @@ const {
          
           <div class="header-right meta">
               <p class="header-claim meta">
-                DIRECTORIO DE LIBRERÍAS
+                Directorio de librerías 
                 <br />
-                DE INTERACTIVO PARA LA WEB.
-              </p>
+                web interactivas              </p>
           </div>
         </header>
       )
@@ -61,11 +62,27 @@ const {
     {
       chrome && (
         <div class="footer-reveal">
-          <slot name="pre-footer" />
-          <footer class="site-footer meta">
-            <span>VIVIFYUX — TU AMOR HACIA LA WEB EN UN INSTANTE.</span>
-            <span>SCROLL: LENIS · GRILLA: GSAP · SITIO: ASTRO</span>
-            <span>2026</span>
+          <footer class="site-footer">
+            {/* firma: la marca a un lado, la promesa al otro, cerrando el ancho */}
+            <div class="site-footer__sign">
+              <a class="site-footer__mark display" href="/" aria-label="VivifyUX, volver al inicio">
+                {'VIVIFYUX'.split('').map((letra) => (
+                  <span aria-hidden="true">{letra}</span>
+                ))}
+              </a>
+              <p class="site-footer__claim meta">
+                Tu amor hacia la web
+                <br />
+                en un instante.
+              </p>
+            </div>
+
+            <div class="site-footer__bar meta">
+              <span>© {anio} VivifyUX</span>
+              <a class="site-footer__top" href="#catalogo">
+                Volver arriba <span aria-hidden="true">↑</span>
+              </a>
+            </div>
           </footer>
         </div>
       )

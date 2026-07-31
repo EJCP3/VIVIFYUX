@@ -23,17 +23,27 @@ const { nombre, claim, descripcion, url, npm, stack, categoria, imagen } = lib.d
 <Base title={`${nombre} — VivifyUX`} description={claim} chrome={false}>
   <article class="project">
     <div class="project__media">
+      {/* la imagen va recortada a pantalla completa (object-fit: cover) sobre una
+          caja casi cuadrada, y las capturas son apaisadas 1.9:1 — el navegador
+          la estira hasta ~1.9 veces el alto del hueco. Por eso `sizes` declara
+          el ancho REAL al que se pinta (mayor que el de la columna) y no el de
+          la caja: con 55vw bajaba la variante de 1200 y se veía pixelada */}
       <Image
         src={imagen}
         alt={`Captura del sitio de ${nombre}`}
-        widths={[720, 1200, 1800]}
-        sizes="(max-width: 900px) 100vw, 55vw"
+        widths={[900, 1400, 1860]}
+        sizes="(max-width: 900px) 190vw, 105vw"
+        quality={90}
         transition:name={`cover-${lib.slug}`}
       />
     </div>
 
     <div class="project__panel">
-      <a class="project__close" href="/" aria-label="Cerrar y volver al catálogo">
+      <a
+        class="project__close"
+        href="/"
+        aria-label="Cerrar y volver al catálogo"
+        data-cuelume-press="release">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M1 1l14 14M15 1L1 15" stroke="currentColor" stroke-width="1.6"></path>
         </svg>
@@ -67,11 +77,11 @@ const { nombre, claim, descripcion, url, npm, stack, categoria, imagen } = lib.d
       <div class="project__rule"></div>
 
       <nav class="project__nav">
-        <a class="side" href={`/libreria/${anterior.slug}/`}>
+        <a class="side" href={`/libreria/${anterior.slug}/`} data-cuelume-press="loading">
           <span class="meta" style="opacity:0.55;">ANTERIOR</span>
           <span class="name">← {anterior.data.nombre}</span>
         </a>
-        <a class="side next" href={`/libreria/${siguiente.slug}/`}>
+        <a class="side next" href={`/libreria/${siguiente.slug}/`} data-cuelume-press="loading">
           <span class="meta" style="opacity:0.55;">SIGUIENTE</span>
           <span class="name">{siguiente.data.nombre} →</span>
         </a>

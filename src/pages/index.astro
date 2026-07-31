@@ -1,13 +1,19 @@
 ---
-import { getCollection } from 'astro:content';
-import Base from '../layouts/Base.astro';
-import Tile from '../components/Tile.astro';
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import Tile from "../components/Tile.astro";
+import FilterIsland from "../components/FilterIsland.astro";
 
-const libs = (await getCollection('librerias')).sort((a, b) => a.data.orden - b.data.orden);
 
-/* --- la grilla: 4 filas, cada una con el catálogo entero rotado,
-   repetido 3 veces para que la marquesina cierre el bucle sin saltos --- */
-const FILAS = 4;
+const libs = (await getCollection("librerias")).sort(
+  (a, b) => a.data.orden - b.data.orden,
+);
+
+/* --- la grilla: 2 filas, cada una con el catálogo entero rotado,
+   repetido 3 veces para que la marquesina cierre el bucle sin saltos.
+   Son 2 y no más porque el encuadre final enmarca exactamente dos: las
+   siguientes nunca se veían enteras, solo asomaban por el borde --- */
+const FILAS = 2;
 const COPIAS = 3;
 
 /* --- el título gigante rota entre la marca, palabras sueltas y frases cortas.
@@ -16,49 +22,28 @@ const COPIAS = 3;
    cada seis entradas: funciona como estribillo. Separador "|" porque algunas
    frases llevan coma --- */
 const PALABRAS = [
-  'Vivifyux',
-  'vida',
-  'dale vida a tu web',
-  'fluidez',
-  'scroll sin saltos',
-  'ritmo',
-  'que no se sienta muerta',
-  'Vivifyux',
-  'sonido',
-  'que suene bien',
-  'texto',
-  'que rueda como slot',
-  'brillo',
-  'bordes con luz',
-  'Vivifyux',
-  'foco',
-  'que no te haga pensar',
-  'calma',
-  'menos decisiones',
-  'detalle',
-  'lo que se ve, se toca',
-  'Vivifyux',
-  'memoria',
-  'que se recuerde',
-  'impulso',
-  'todo a un click',
-  'energía',
-  'y que cargue rápido',
+  "VIVIFYUX",
+  "INTERACCIÓN",
+  "FLUIDEZ",
+  "ANIMACIÓN",
+  "VIVIFYUX",
+  "EXPERIENCIA",
+  "CREATIVIDAD",
+  "DINAMISMO",
+  "VIVIFYUX",
+  "MOTION",
+  "DISEÑO",
+  "IMPACTO",
+  "INTERACTIVOS",
+  "VISUAL",
+  "ANIMACIÓN",
+  "VIVIFYUX",
+  "VIBRANTE"
+
 ];
 
 /* --- leyes de lawsofux.com/es, cada una atada a algo que este sitio hace --- */
-const LEYES = [
-  ['Ley de Jakob', 'La ficha se cierra como cualquier otra: la X, Escape y el botón atrás.'],
-  ['Ley de Fitts', 'El click es toda la tarjeta —imagen, nombre y categoría—, no solo el título.'],
-  ['Umbral de Doherty', 'Nada tarda más de 400 ms en responder: ni un hover, ni la transición de la ficha.'],
-  ['Efecto de Tendencia a la Meta', 'La línea de arriba muestra cuánto falta para el final de la página.'],
-  ['Ley de Región Común', 'Nombre y categoría van pegados a su imagen, no en una lista aparte.'],
-  ['Efecto Von Restorff', 'Todo es blanco y negro para que el único color —el de las capturas— sea lo que se mira.'],
-  ['Ley de Miller', 'Seis categorías, no veinte: entran de una en la memoria de trabajo.'],
-  ['Sobrecarga de Opciones', 'Diez librerías, una por problema. No hay que elegir entre variantes de lo mismo.'],
-  ['Paradoja del Usuario Activo', 'Nadie lee instrucciones: la grilla se explica moviéndose sola.'],
-  ['Regla de fin de pico', 'La página termina en su momento más grande, no apagándose de a poco.'],
-];
+
 
 const filas = Array.from({ length: FILAS }, (_, i) => {
   const corte = (i * 3) % libs.length;
@@ -67,25 +52,53 @@ const filas = Array.from({ length: FILAS }, (_, i) => {
 });
 
 /* --- datos reales derivados del catálogo --- */
-const categorias = ['scroll', 'texto', 'transiciones', 'efectos', 'sonido', 'motor'] as const;
+const categorias = [
+  "scroll",
+  "texto",
+  "transiciones",
+  "efectos",
+  "sonido",
+  "motor",
+] as const;
 const porCategoria = categorias.map((c) => ({
   nombre: c,
   total: libs.filter((l) => l.data.categoria === c).length,
 }));
-
 ---
 
 <Base>
+  <!-- ===== filtro de categorías (Dynamic Island) ===== -->
+  <FilterIsland categorias={porCategoria} total={libs.length} />
+
   <!-- ===== capítulo de trabajos: el zoom-out de la grilla ===== -->
   <section class="works" id="catalogo">
     <div class="works__stage">
       <div class="works__scaler">
-        <div class="wordmark">
-          <h1 class="wordmark__text is-brand" aria-label="VivifyUX">
-            <span class="wordmark__slot" data-words={PALABRAS.join('|')}>Vivifyux</span><span
-              class="wordmark__c">©</span
-            >
-          </h1>
+        
+        <!-- ===== HERO MARQUEE (INCAMANA STYLE) ===== -->
+        <div class="scrolling-text">
+          <div class="rail">
+            {['VIVIFYUX', ...PALABRAS, 'VIVIFYUX', ...PALABRAS].map((palabra) => (
+              <h4 data-text={palabra.toUpperCase()} data-cuelume-press="tick">
+                <div class="flair">
+                  <svg class="flair-star" viewBox="0 0 100 100">
+                    <g fill="currentColor">
+                      <rect x="42" y="0" width="16" height="100" rx="8" />
+                      <rect x="0" y="42" width="100" height="16" rx="8" />
+                      <rect x="42" y="0" width="16" height="100" rx="8" transform="rotate(45 50 50)" />
+                      <rect x="42" y="0" width="16" height="100" rx="8" transform="rotate(-45 50 50)" />
+                    </g>
+                  </svg>
+                  <svg class="flair-circle" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="35" stroke="currentColor" stroke-width="20" fill="none" />
+                  </svg>
+                </div>
+                {palabra.toUpperCase().split('').map((letra) => (
+                  <span>{letra}</span>
+                ))}
+              </h4>
+            ))}
+          </div>
         </div>
 
         <div class="rows">
@@ -93,12 +106,13 @@ const porCategoria = categorias.map((c) => ({
             filas.map((fila) => (
               <div class="row">
                 <div class="row__track" data-copies={COPIAS}>
-                  {fila.map((lib) => (
+                  {fila.map((lib, idx) => (
                     <Tile
                       slug={lib.slug}
                       nombre={lib.data.nombre}
                       categoria={lib.data.categoria}
                       imagen={lib.data.imagen}
+                      isCopy={idx >= libs.length}
                     />
                   ))}
                 </div>
@@ -108,28 +122,10 @@ const porCategoria = categorias.map((c) => ({
         </div>
       </div>
     </div>
-
-    <p class="scroll-cue meta" aria-hidden="true">SEGUÍ BAJANDO PARA VERLAS EN GRANDE ↓</p>
   </section>
 
-  <!-- ===== about ===== -->
-  <section class="section">
-    <div class="section__inner">
-      <h2 class="display section__title" data-reveal>About</h2>
-      <div class="stack-copy" data-reveal data-reveal-children>
-        <p class="copy meta" style="font-size:clamp(13px,1.05vw,16px);letter-spacing:0.03em;">
-          VIVIFYUX ES UN DIRECTORIO CURADO DE LIBRERÍAS DE INTERACCIÓN PARA LA WEB. DIEZ
-          HERRAMIENTAS ELEGIDAS A MANO, NO UN LISTADO AUTOMÁTICO: SCROLL, TEXTO, TRANSICIONES,
-          EFECTOS, SONIDO Y MOTORES DE ANIMACIÓN.
-        </p>
-        <p class="copy meta" style="font-size:clamp(13px,1.05vw,16px);letter-spacing:0.03em;">
-          EL SITIO CORRE CON LAS MISMAS LIBRERÍAS QUE CATALOGA: LENIS MUEVE EL SCROLL, GSAP MUEVE
-          LA GRILLA. LA FICHA DE CADA LIBRERÍA ABRE CON UNA VIEW TRANSITION SOBRE LA IMAGEN EN LA
-          QUE HICISTE CLICK.
-        </p>
-      </div>
-    </div>
-  </section>
+
+ 
 
   <!-- ===== técnicas / categorías ===== -->
   <section class="section">
@@ -146,40 +142,25 @@ const porCategoria = categorias.map((c) => ({
             ))
           }
         </ul>
-        
       </div>
     </div>
   </section>
 
-  <!-- ===== leyes de UX aplicadas ===== -->
-  <section class="section">
-    <div class="section__inner">
-      <div>
-        <h2 class="display section__title" data-reveal>Leyes</h2>
-        <p class="meta" style="margin-top:14px;opacity:0.55;">
-          LEÍDAS EN
-          <a href="https://lawsofux.com/es/" target="_blank" rel="noopener" class="link">
-            LAWSOFUX.COM ↗
-          </a>
-        </p>
-      </div>
-      <ul class="laws" data-reveal data-reveal-children>
-        {
-          LEYES.map(([ley, aplicacion]) => (
-            <li class="laws__row">
-              <span class="meta">{ley}</span>
-              <span class="laws__how">{aplicacion}</span>
-            </li>
-          ))
-        }
-      </ul>
+
+
+  <!-- ===== contacto: cierra el contenido, justo encima del pie ===== -->
+  <section class="contact">
+    <h2 class="display contact__display">¿Falta<br />alguna?</h2>
+    <div class="contact__aside">
+      <p class="copy contact__copy">
+        El catálogo crece con lo que propone quien lo usa. Si conoces una
+        librería que merece estar acá, cuéntala en un issue y la revisamos.
+      </p>
+      <a
+        class="pill meta"
+        href="https://github.com/vivifyux/vivifyux.github.io/issues/new"
+        target="_blank"
+        rel="noopener">Proponer una librería ↗</a>
     </div>
-  </section>
-
-
-  <!-- ===== contacto (se revela junto con el footer) ===== -->
-  <section slot="pre-footer" class="contact">
-      <h1>Conoce alguna libreria que hace falta?</h1>
-      <p>Crear un issues en <a href="https://github.com/vivifyux/vivifyux.github.io/issues" target="_blank" rel="noopener" class="link">GitHub ↗</a></p>
   </section>
 </Base>

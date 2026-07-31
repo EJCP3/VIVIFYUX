@@ -4,6 +4,7 @@
    El único color de la pantalla lo ponen las imágenes.
    ========================================================= */
 
+
 :root {
   --bg: #ffffff;
   --ink: #0a0a0a;
@@ -217,54 +218,257 @@ button {
   transform: translate(-50%, -50%);
 }
 
-/* slot-text impone line-height 1.3 en cada celda: acá manda la caja del título */
-.wordmark__text .char-slot {
-  line-height: inherit;
-}
-
-/* el © es de la marca: se va cuando el título rueda a otra palabra */
-.wordmark__c {
-  opacity: 0;
-  transition: opacity 260ms ease;
-}
-
-.wordmark__text.is-brand .wordmark__c {
-  opacity: 1;
-}
-
-/* la caja del título tiene alto fijo aunque el texto cambie de tamaño: las
-   frases entran más chicas que las palabras y las tarjetas no se mueven */
-.wordmark {
-  /* 33vw en pantalla al inicio; acá se escribe en espacio de contenido */
-  --wm-fs: calc(33vw / var(--zoom0));
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: calc(var(--wm-fs) * 0.9);
-  margin-bottom: calc(clamp(10px, 1.4vw, 26px) / var(--zoom0));
-}
-
-.wordmark__text {
+.scrolling-text {
+  overflow: hidden;
+  width: 100%;
+  height: 35.5vw;
   position: relative;
-  display: block;
-  font-family: var(--font-display);
-  font-weight: 400;
-  /* el tamaño final lo fija el JS por frase; esto es el techo */
-  font-size: var(--wm-fs);
-  /* la tinta de Bebas mide 0.71em: con 0.9 la celda del slot tiene margen para
-     el rebote de entrada sin que las letras se vean cortadas arriba o abajo */
-  line-height: 0.9;
-  letter-spacing: -0.012em;
-  text-transform: uppercase;
-  white-space: nowrap;
+  background-color: transparent;
+  margin-bottom: 2vw; /* Tight spacing like the image */
 }
 
-.wordmark__c {
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 0.1em;
-  vertical-align: super;
-  letter-spacing: 0;
+.scrolling-text .rail {
+  display: flex;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.scrolling-text .rail h4 {
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: 32vw;
+  font-weight: 400;
+  letter-spacing: 0em;
+  line-height: 1.1;
+  margin: 0 40px 0 0;
+  color: var(--ink);
+  text-transform: uppercase;
+  position: relative; /* needed for the ::before/::after absolute positioning */
+}
+
+/* GSAP-style Glitch Effect */
+.is-glitching {
+  color: #0ae448 !important; /* GSAP Green */
+}
+
+.is-glitching::before,
+.is-glitching::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  color: #0ae448;
+  background: var(--bg); /* white background so slices obscure the text behind them */
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.is-glitching::before {
+  left: 4px;
+  text-shadow: -2px 0 red;
+  clip-path: polygon(0 20%, 100% 20%, 100% 30%, 0 30%);
+  animation: glitch-anim-1 0.25s infinite linear alternate-reverse;
+}
+
+.is-glitching::after {
+  left: -4px;
+  text-shadow: -2px 0 blue;
+  clip-path: polygon(0 60%, 100% 60%, 100% 70%, 0 70%);
+  animation: glitch-anim-2 0.35s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim-1 {
+  0% { clip-path: polygon(0 15%, 100% 15%, 100% 25%, 0 25%); transform: translate(3px, 0) skewX(5deg); }
+  25% { clip-path: polygon(0 40%, 100% 40%, 100% 45%, 0 45%); transform: translate(-3px, 0) skewX(-5deg); }
+  50% { clip-path: polygon(0 10%, 100% 10%, 100% 50%, 0 50%); transform: translate(3px, 0) skewX(0); }
+  75% { clip-path: polygon(0 70%, 100% 70%, 100% 75%, 0 75%); transform: translate(-3px, 0) skewX(5deg); }
+  100% { clip-path: polygon(0 30%, 100% 30%, 100% 60%, 0 60%); transform: translate(3px, 0) skewX(-5deg); }
+}
+
+@keyframes glitch-anim-2 {
+  0% { clip-path: polygon(0 65%, 100% 65%, 100% 75%, 0 75%); transform: translate(-3px, 0) skewX(-5deg); }
+  25% { clip-path: polygon(0 30%, 100% 30%, 100% 35%, 0 35%); transform: translate(3px, 0) skewX(5deg); }
+  50% { clip-path: polygon(0 80%, 100% 80%, 100% 90%, 0 90%); transform: translate(-3px, 0) skewX(0); }
+  75% { clip-path: polygon(0 50%, 100% 50%, 100% 55%, 0 55%); transform: translate(3px, 0) skewX(-5deg); }
+  100% { clip-path: polygon(0 75%, 100% 75%, 100% 95%, 0 95%); transform: translate(-3px, 0) skewX(5deg); }
+}
+
+/* Var 2: Heavy Skew, Magenta/Cyan */
+.glitch-var-2 { color: #f0f !important; }
+.glitch-var-2::before, .glitch-var-2::after {
+  content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: var(--bg); overflow: hidden; pointer-events: none;
+}
+.glitch-var-2::before {
+  color: #0ff; left: 6px; text-shadow: -3px 0 #f0f;
+  animation: glitch-v2-1 0.15s infinite linear alternate-reverse;
+}
+.glitch-var-2::after {
+  color: #f0f; left: -6px; text-shadow: 3px 0 #0ff;
+  animation: glitch-v2-2 0.2s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-v2-1 {
+  0% { clip-path: polygon(0 0%, 100% 0%, 100% 20%, 0 20%); transform: translate(5px, 2px) skewX(15deg); }
+  50% { clip-path: polygon(0 40%, 100% 40%, 100% 60%, 0 60%); transform: translate(-5px, -2px) skewX(-15deg); }
+  100% { clip-path: polygon(0 80%, 100% 80%, 100% 100%, 0 100%); transform: translate(5px, 2px) skewX(10deg); }
+}
+@keyframes glitch-v2-2 {
+  0% { clip-path: polygon(0 20%, 100% 20%, 100% 40%, 0 40%); transform: translate(-5px, -2px) skewX(-15deg); }
+  50% { clip-path: polygon(0 60%, 100% 60%, 100% 80%, 0 80%); transform: translate(5px, 2px) skewX(15deg); }
+  100% { clip-path: polygon(0 10%, 100% 10%, 100% 30%, 0 30%); transform: translate(-5px, -2px) skewX(-10deg); }
+}
+
+/* Var 3: Flashing Yellow, Vertical jitter */
+.glitch-var-3 { color: #e9ff00 !important; transform: translateY(-3px); }
+.glitch-var-3::before, .glitch-var-3::after {
+  content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: var(--bg); overflow: hidden; pointer-events: none;
+}
+.glitch-var-3::before {
+  color: #e9ff00; left: 2px;
+  animation: glitch-v3-1 0.1s infinite linear alternate-reverse;
+}
+.glitch-var-3::after {
+  color: #fff; left: -2px; text-shadow: 3px 0 red;
+  animation: glitch-v3-2 0.12s infinite linear alternate-reverse;
+}
+@keyframes glitch-v3-1 {
+  0%, 100% { clip-path: polygon(0 50%, 100% 50%, 100% 55%, 0 55%); transform: translate(0, 4px); }
+}
+@keyframes glitch-v3-2 {
+  0%, 100% { clip-path: polygon(0 45%, 100% 45%, 100% 50%, 0 50%); transform: translate(0, -4px); }
+}
+
+/* Letter-by-letter color wave */
+.scrolling-text .rail h4 span {
+  display: inline-block;
+  position: relative; /* ancla del signo que sustituye a la letra */
+  transition: color 0.1s;
+}
+.is-glitching span { color: #0ae448; }
+.glitch-var-2 span { color: #0ff; }
+.glitch-var-3 span { color: #e9ff00; }
+
+/* Var 4: una letra se cae y la sustituye un signo.
+   La letra no se borra: se vuelve transparente y conserva su ancho, así la
+   palabra no se mueve ni un píxel mientras dura el cambio */
+.letra-oculta {
+  color: transparent !important;
+}
+
+/* la letra se apaga y vuelve despacio, para que el cambio se lea.
+   Los selectores de las variantes van con el prefijo completo: `.rail h4 span`
+   fija transition:color .1s con más peso y si no se iguala, gana el de 0.1s */
+.scrolling-text .rail h4.glitch-swap span {
+  transition: color 0.4s ease;
+}
+
+/* el selector va completo a propósito: `.rail h4 span` fija position:relative
+   con más peso, y si el signo hereda ese relative entra en el flujo y estira
+   la letra hasta empujar la palabra entera */
+.scrolling-text .rail h4 .letra-signo {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: signo-entra 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.scrolling-text .rail h4 .letra-signo.saliendo {
+  animation: signo-sale 0.45s cubic-bezier(0.55, 0, 0.7, 0.2) both;
+}
+
+/* centrado por transform y no por grid: el signo es más ancho que letras
+   estrechas como la I, y un item que desborda su celda se alinea al inicio */
+.scrolling-text .rail h4 .letra-signo svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.5em;
+  height: 0.5em;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes signo-entra {
+  from { opacity: 0; transform: scale(0.45) rotate(-25deg); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes signo-sale {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: scale(0.55) rotate(20deg); }
+}
+
+/* Var 5: letras sueltas en otro color, repartidas al azar por la palabra.
+   El barrido (var 6) lo lleva GSAP, letra a letra, desde el script */
+/* el barrido lo escribe GSAP fotograma a fotograma: la transición de color
+   heredada lo emborronaría y se perdería el paso de letra a letra */
+.scrolling-text .rail h4.glitch-sweep span { transition: none; }
+
+/* las letras sueltas encienden y apagan en cascada (el retardo por nth-child
+   ya está más arriba), no de golpe */
+.scrolling-text .rail h4.glitch-scatter span { transition: color 0.45s ease; }
+
+.glitch-scatter .letra-alt-1 { color: #ff4d8d; }
+.glitch-scatter .letra-alt-2 { color: #7b61ff; }
+.glitch-scatter .letra-alt-3 { color: #0ae448; }
+
+.scrolling-text .rail h4[class*="glitch"] span:nth-child(1) { transition-delay: 0.00s; }
+.scrolling-text .rail h4[class*="glitch"] span:nth-child(2) { transition-delay: 0.03s; }
+.scrolling-text .rail h4[class*="glitch"] span:nth-child(3) { transition-delay: 0.06s; }
+.scrolling-text .rail h4[class*="glitch"] span:nth-child(4) { transition-delay: 0.09s; }
+.scrolling-text .rail h4[class*="glitch"] span:nth-child(5) { transition-delay: 0.12s; }
+.scrolling-text .rail h4[class*="glitch"] span:nth-child(6) { transition-delay: 0.15s; }
+.scrolling-text .rail h4[class*="glitch"] span:nth-child(7) { transition-delay: 0.18s; }
+.scrolling-text .rail h4[class*="glitch"] span:nth-child(8) { transition-delay: 0.21s; }
+.scrolling-text .rail h4[class*="glitch"] span:nth-child(9) { transition-delay: 0.24s; }
+.scrolling-text .rail h4[class*="glitch"] span:nth-child(10) { transition-delay: 0.27s; }
+.scrolling-text .rail h4[class*="glitch"] span:nth-child(11) { transition-delay: 0.30s; }
+.scrolling-text .rail h4[class*="glitch"] span:nth-child(12) { transition-delay: 0.33s; }
+.scrolling-text .rail h4[class*="glitch"] span:nth-child(13) { transition-delay: 0.36s; }
+.scrolling-text .rail h4[class*="glitch"] span:nth-child(14) { transition-delay: 0.39s; }
+.scrolling-text .rail h4[class*="glitch"] span:nth-child(15) { transition-delay: 0.42s; }
+
+/* SVG Flairs */
+.flair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+.flair svg {
+  position: absolute;
+  opacity: 0;
+  transform: scale(0) rotate(0deg);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.flair-star {
+  top: -25%; 
+  right: 15%;
+  width: 3vw; /* Tiny star */
+  color: #ff98a2;
+}
+.flair-circle {
+  top: -10%; 
+  left: 20%;
+  width: 2vw; /* Tiny circle */
+  color: #7b61ff;
+}
+
+h4[class*="glitch"] .flair-star {
+  opacity: 1;
+  transform: scale(1) rotate(90deg) translate(-20px, -20px);
+}
+h4[class*="glitch"] .flair-circle {
+  opacity: 1;
+  transform: scale(1) rotate(-45deg) translate(20px, -10px);
 }
 
 .rows {
@@ -277,6 +481,12 @@ button {
   display: flex;
   gap: var(--tile-gap);
   width: max-content;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.row__track img {
+  -webkit-user-drag: none; /* Prevents ghost image when dragging tiles */
 }
 
 /* ---------- tarjeta de librería ---------- */
@@ -334,8 +544,10 @@ button {
 
 /* ---------- secciones de contenido ---------- */
 
+/* el borde inferior es más corto que el superior: debajo ya viene el pie,
+   y sumar los dos respiros dejaba una franja blanca vacía antes del cierre */
 .section {
-  padding: var(--gap-section) var(--pad);
+  padding: var(--gap-section) var(--pad) clamp(32px, 4vw, 56px);
   border-top: 1px solid var(--line);
 }
 
@@ -457,27 +669,33 @@ button {
 
 /* ---------- contacto ---------- */
 
+/* banda de cierre: la pregunta manda a la izquierda, la acción a la derecha.
+   Va apretada a propósito: el pie entero es fixed y no puede comerse la pantalla */
 .contact {
-  padding: var(--gap-section) var(--pad) clamp(28px, 4vw, 56px);
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  align-items: end;
+  gap: clamp(18px, 3vw, 56px);
+  padding: clamp(26px, 3vw, 46px) var(--pad) clamp(24px, 2.6vw, 38px);
   border-top: 1px solid var(--line);
-  text-align: center;
 }
 
 .contact__display {
-  font-size: clamp(56px, 15vw, 240px);
-  display: inline-block;
+  font-size: clamp(38px, 5.4vw, 92px);
 }
 
-.contact__lines {
+.contact__aside {
   display: grid;
-  gap: 4px;
-  justify-items: center;
-  margin-top: 20px;
+  justify-items: start;
+  gap: 18px;
+}
+
+.contact__copy {
+  max-width: 44ch;
 }
 
 .pill {
   display: inline-block;
-  margin-top: 28px;
   padding: 13px 26px;
   border: 1px solid var(--line);
   border-radius: 100px;
@@ -501,17 +719,75 @@ button {
   background: var(--bg);
 }
 
-.footer-reveal > .contact {
-  border-top: none;
+/* el pie está fuera del flujo: sus medidas se atan también al alto de la
+   ventana para que la revelación no se coma la pantalla en portátiles bajos */
+.site-footer {
+  padding: clamp(22px, 3.4vh, 40px) var(--pad) 0;
+  border-top: 1px solid var(--line);
 }
 
-.site-footer {
+.site-footer__sign {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: clamp(16px, 4vw, 60px);
+  margin-top: clamp(22px, 3.6vh, 40px);
+}
+
+/* la marca grande es la firma; la altura se ata al viewport porque el pie
+   es fixed y no puede crecer más que la ventana que lo revela */
+.site-footer__mark {
+  display: flex;
+  overflow: hidden;
+  font-size: min(clamp(54px, 11vw, 168px), 17vh);
+  line-height: 0.78;
+}
+
+.site-footer__mark span {
+  display: block;
+  transition: transform 340ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.site-footer__mark:hover span {
+  transform: translateY(-9%);
+}
+
+.site-footer__mark span:nth-child(2) { transition-delay: 25ms; }
+.site-footer__mark span:nth-child(3) { transition-delay: 50ms; }
+.site-footer__mark span:nth-child(4) { transition-delay: 75ms; }
+.site-footer__mark span:nth-child(5) { transition-delay: 100ms; }
+.site-footer__mark span:nth-child(6) { transition-delay: 125ms; }
+.site-footer__mark span:nth-child(7) { transition-delay: 150ms; }
+.site-footer__mark span:nth-child(8) { transition-delay: 175ms; }
+
+.site-footer__bar {
   display: flex;
   flex-wrap: wrap;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 12px 28px;
-  padding: 16px var(--pad);
+  gap: 8px 28px;
+  margin-top: clamp(12px, 1.8vh, 22px);
+  padding: 13px 0 14px;
   border-top: 1px solid var(--line);
+}
+
+.site-footer__claim {
+  padding-bottom: 0.7em;
+  text-align: right;
+  opacity: 0.5;
+}
+
+.site-footer__top {
+  background-image: linear-gradient(var(--ink), var(--ink));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition: background-size 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.site-footer__top:hover,
+.site-footer__top:focus-visible {
+  background-size: 100% 1px;
 }
 
 /* ---------- ficha de librería (vista de proyecto) ---------- */
@@ -693,6 +969,25 @@ button {
   .wordmark {
     --wm-fs: calc(40vw / var(--zoom0));
   }
+
+  /* el pie es fixed: en pantallas bajas tiene que caber sin tapar la página */
+  .contact {
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: 16px;
+  }
+
+  .contact__copy {
+    font-size: 14px;
+  }
+
+  .site-footer__bar {
+    justify-content: flex-start;
+  }
+
+  .site-footer__claim {
+    display: none;
+  }
 }
 
 /* ---------- view transitions ---------- */
@@ -701,13 +996,28 @@ button {
    el resto de la página hace un cross-fade corto por debajo */
 /* umbral de Doherty: por debajo de 400 ms nadie siente que está esperando */
 ::view-transition-group(*) {
-  animation-duration: 380ms;
+  animation-duration: 600ms;
   animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 260ms;
+  animation-duration: 400ms;
+}
+
+/* ---------- accesibilidad ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .tile:hover .tile__media img {
+    transform: none;
+  }
 }
 
 /* ---------- accesibilidad ---------- */
