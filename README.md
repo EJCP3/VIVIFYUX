@@ -5,7 +5,6 @@ transiciones, efectos, sonido y motores de animación. Cada ficha resume qué
 hace la librería, con qué está hecha y enlaza a su sitio y a su paquete de npm.
 El catálogo corre con las mismas librerías que cataloga.
 
-**[vivifyux.com](https://vivifyux.com)**
 
 [Proponer una librería](https://github.com/EJCP3/VIVIFYUX-/issues/new) ·
 [Reportar un fallo](https://github.com/EJCP3/VIVIFYUX-/issues) ·
