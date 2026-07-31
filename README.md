@@ -1,6 +1,6 @@
 # VivifyUX
 
-Directorio curado de librerías de interacción para la web: scroll, texto,
+Directorio de librerías de interacción para la web: scroll, texto,
 transiciones, efectos, sonido y motores de animación. Cada ficha resume qué
 hace la librería, con qué está hecha y enlaza a su sitio y a su paquete de npm.
 El catálogo corre con las mismas librerías que cataloga.
