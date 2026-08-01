@@ -53,7 +53,6 @@ export const TEXTOS = {
   'contacto.cta': { en: 'Suggest a library ↗', es: 'Sugerir una librería ↗' },
 
   'ficha.categoria': { en: 'CATEGORY', es: 'CATEGORÍA' },
-  'ficha.tips': { en: 'TIPS', es: 'TIPS' },
   'ficha.visitar': { en: 'VISIT SITE', es: 'VER SITIO' },
   'ficha.anterior': { en: 'PREVIOUS', es: 'ANTERIOR' },
   'ficha.siguiente': { en: 'NEXT', es: 'SIGUIENTE' },

@@ -18,16 +18,12 @@ export async function getStaticPaths() {
 }
 
 const { lib, anterior, siguiente } = Astro.props;
-const { nombre, claim, descripcion, url, npm, categoria, imagen, tips = [] } = lib.data;
+const { nombre, claim, descripcion, url, npm, categoria, imagen } = lib.data;
 
 /* claim y descripcion vienen del frontmatter como { en, es }: el HTML se pinta
    en el idioma base y el script cambia al otro con los data-en/data-es */
 const L = IDIOMA_BASE;
 const etiqueta = CATEGORIAS[categoria];
-
-/* los tips a medio escribir no se publican: el bloque solo aparece cuando hay
-   texto de verdad en los dos idiomas */
-const tipsListos = tips.filter((tip) => tip.en.trim() !== '' && tip.es.trim() !== '');
 ---
 
 <Base
@@ -82,24 +78,6 @@ const tipsListos = tips.filter((tip) => tip.en.trim() !== '' && tip.es.trim() !=
           <span class="chip" data-en={etiqueta.en} data-es={etiqueta.es}>{etiqueta[L]}</span>
         </div>
       </div>
-
-      {
-        tipsListos.length > 0 && (
-          <>
-            <div class="project__rule" />
-            <div>
-              <p class="meta" style="opacity:0.55;margin-bottom:12px;" data-i18n="ficha.tips">
-                {t('ficha.tips', L)}
-              </p>
-              <ul class="project__tips copy">
-                {tipsListos.map((tip) => (
-                  <li data-en={tip.en} data-es={tip.es}>{tip[L]}</li>
-                ))}
-              </ul>
-            </div>
-          </>
-        )
-      }
 
       <div class="project__rule"></div>
 

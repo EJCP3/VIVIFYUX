@@ -1029,37 +1029,6 @@ h4[class*="glitch"] .flair-circle {
   background: #dededa;
 }
 
-/* los dos apuntes de la ficha. Viñeta propia en vez de list-style: el disco
-   del navegador se descuelga del texto cuando el tip ocupa dos líneas */
-.project__tips {
-  display: grid;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  max-width: 46ch;
-  font-size: clamp(13px, 1vw, 15px);
-  line-height: 1.5;
-}
-
-.project__tips li {
-  position: relative;
-  padding-left: 18px;
-}
-
-.project__tips li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  /* a la altura de la primera línea, no del centro del bloque */
-  top: 0.62em;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--ink);
-  opacity: 0.45;
-}
-
 .project__nav {
   display: flex;
   justify-content: space-between;

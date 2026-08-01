@@ -7,13 +7,6 @@ claim:
 descripcion: 
   en: "An avatar generator with 6 shape families and 40 palettes, tuned through OKLCH tone controls for deterministic, reproducible variants. Ships as zero-dependency SVG, exportable to PNG or JPG at any size."
   es: "Un generador de avatares con 6 familias de formas y 40 paletas, ajustado mediante controles de tono OKLCH para obtener variantes deterministas y reproducibles. Se entrega como SVG sin dependencias, exportable a PNG o JPG en cualquier tamaño."
-tips:
-  # TODO: dos apuntes practicos sobre esta libreria, en los dos idiomas.
-  # La ficha no muestra el bloque hasta que en y es tengan texto.
-  - en: ""
-    es: ""
-  - en: ""
-    es: ""
 url: "https://oreo-design-avatar.vercel.app/"
 npm: "@oreo-design/avatar"
 imagen: "../../assets/oreo-avatar.webp"

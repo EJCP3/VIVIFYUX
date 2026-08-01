@@ -13,9 +13,10 @@ const L = IDIOMA_BASE;
 <div class="island-container">
   <div class="island">
     <div class="island-logo--cont">
-      {/* con un filtro puesto site.ts le escribe encima el nombre de la
-          categoría, así que no lleva data-i18n: lo repinta él */}
-      <span class="island-logo meta">{t('filtro.etiqueta', L)}</span>
+      {/* sin filtro dice "FILTRAR" y lo traduce el data-i18n; con uno puesto le
+          escribe encima el nombre de la categoría (setupFilterIsland, que corre
+          después de pintarIdioma y por eso gana) */}
+      <span class="island-logo meta" data-i18n="filtro.etiqueta">{t('filtro.etiqueta', L)}</span>
     </div>
     <button
       class="menu-btn"

@@ -11,9 +11,9 @@ Directory of interaction libraries for the web: scroll, text, transitions, effec
 ## How to run it
 
 ```bash
-npm install
-npm run dev       # http://localhost:4321
-npm run build     # generates /dist
+pnpm install
+pnpm run dev       # http://localhost:4321
+pnpm run build     # generates /dist
 ```
 
 ## Contributing

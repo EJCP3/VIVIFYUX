@@ -40,8 +40,8 @@ That's enough. We will prepare the card and the screenshot.
 ```bash
 git clone https://github.com/EJCP3/VIVIFYUX-.git
 cd VIVIFYUX-
-npm install
-npm run dev       # http://localhost:4321
+pnpm install
+pnpm run dev       # http://localhost:4321
 ```
 
 Work on a separate branch:

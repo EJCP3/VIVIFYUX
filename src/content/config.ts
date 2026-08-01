@@ -15,18 +15,6 @@ const librerias = defineCollection({
       es: z.string(),
     }),
     
-    /* dos apuntes prácticos por librería. Van vacíos en las que todavía no se
-       escribieron: la ficha solo muestra el bloque cuando hay texto en los dos
-       idiomas, así un tip a medias nunca llega a publicarse */
-    tips: z
-      .array(
-        z.object({
-          en: z.string(),
-          es: z.string(),
-        }),
-      )
-      .default([]),
-
     url: z.string().url(),
     npm: z.string().optional(),
     imagen: image(),

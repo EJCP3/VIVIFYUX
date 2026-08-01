@@ -14,9 +14,9 @@ El catálogo corre con las mismas librerías que cataloga.
 ## Cómo correrlo
 
 ```bash
-npm install
-npm run dev       # http://localhost:4321
-npm run build     # genera /dist
+pnpm install
+pnpm run dev       # http://localhost:4321
+pnpm run build     # genera /dist
 ```
 
 ## Contribuir

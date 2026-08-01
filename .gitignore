@@ -3,6 +3,9 @@ node_modules
 *.txt
 .env
 desing.md
-scripts
+# solo la carpeta de utilidades de la raíz. Sin la barra inicial el patrón
+# también se llevaba src/scripts/, y el build de Vercel se caía porque los
+# módulos del sitio nunca llegaban al repositorio
+/scripts/
 dist/
 .astro/

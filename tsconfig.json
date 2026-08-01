@@ -1,0 +1,6 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "//": "sin este archivo TypeScript no carga .astro/types.d.ts y getCollection('librerias') se resolvía a never. El preset strict además es obligatorio para Zod: sin strictNullChecks infiere todos los campos del esquema como opcionales",
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist", "node_modules"]
+}
