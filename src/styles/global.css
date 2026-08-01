@@ -17,6 +17,10 @@
   --pad: clamp(16px, 2.4vw, 40px);
   --gap-section: clamp(64px, 9vw, 130px);
 
+  /* cuerpo del título gigante: lo comparten el riel del hero y el título del
+     filtro, y de él sale también el alto de la caja del riel */
+  --hero-fs: 14.4vw;
+
   /* La grilla se maqueta al tamaño FINAL del zoom (escala 1) y arranca
      reducida a --zoom0. --zoom1 es la escala final visible: menor a 1 para
      que entren 2 filas completas en pantalla.
@@ -263,31 +267,42 @@ button {
   transform: translate(-50%, -50%);
 }
 
-/* el riel del título vive fuera de .works__scaler: no tiene el zoom del
-   scroll encima, es un bloque de tamaño fijo que se ve siempre igual, arriba
-   del carrusel (o de la grilla del filtro). Los números son los mismos de
-   siempre multiplicados por --zoom0 (0.45): así se ve pixel a pixel como se
-   veía antes en el reposo inicial, que es el único estado que existía */
+/* el riel del título vive dentro de .works__stage pero fuera de
+   .works__scaler: no tiene el zoom del scroll encima, es un bloque de tamaño
+   fijo. Va absoluto y no en el flujo: antes se colocaba con un margin-top que
+   se escapaba por colapso de márgenes y empujaba la sección entera hacia
+   abajo, así que había que scrollear una franja en blanco antes de que el
+   zoom del carrusel siquiera arrancara. Ahora el encuadre lo pone measure()
+   dentro del propio sticky y la sección empieza pegada al borde de la página */
 .scrolling-text {
+  position: absolute;
+  top: 0; /* lo calcula measure() */
+  left: 0;
   overflow: hidden;
   width: 100%;
-  height: 16vw;
-  position: relative;
+  /* la caja de línea mide 1.1 del cuerpo; el resto es aire arriba. Al saltar,
+     las letras suben hasta un 0.4 del cuerpo (yPercent -22 + scaleY 1.14 con
+     origen abajo) y con la caja al ras se les cortaba la cabeza: 1.1 + 0.4 +
+     el respiro de abajo es el mínimo, el resto es margen de seguridad */
+  height: calc(var(--hero-fs) * 1.7);
   background-color: transparent;
+  /* no maqueta nada (el bloque es absoluto): measure() lo lee como la
+     separación entre el título y la primera fila */
   margin-bottom: 0.9vw;
 }
 
 .scrolling-text .rail {
   display: flex;
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+  /* pegado abajo: el aire sobrante se junta todo arriba, que es hacia donde
+     saltan las letras */
+  bottom: calc(var(--hero-fs) * 0.06);
 }
 
 .scrolling-text .rail h4 {
   white-space: nowrap;
   font-family: var(--font-display);
-  font-size: 14.4vw;
+  font-size: var(--hero-fs);
   font-weight: 400;
   letter-spacing: 0em;
   line-height: 1.1;
@@ -596,9 +611,8 @@ h4[class*="glitch"] .flair-circle {
    Vive fuera de .works__scaler a propósito: no tiene el zoom del scroll
    encima, es contenido normal que se recorre con el scroll de la página.
    Oculta por defecto; site.ts la muestra en vez del carrusel apenas hay una
-   categoría activa. El título (.scrolling-text) es hermano de .works__stage,
-   así que hay que apagarlo aparte: con un filtro puesto ese lugar queda
-   libre para lo que se ponga ahí después. */
+   categoría activa. El riel del título (.scrolling-text) cuelga de
+   .works__stage, así que se apaga con él. */
 
 .filtered-grid {
   display: none;
@@ -620,7 +634,7 @@ h4[class*="glitch"] .flair-circle {
     text-align: center; /* 👈 Centra el texto directamente */
   padding: clamp(88px, 12vh, 150px) var(--pad) 0;
   font-family: var(--font-display);
-  font-size: 14.4vw;
+  font-size: var(--hero-fs);
   font-weight: 400;
   letter-spacing: 0em;
   line-height: 1.1;
@@ -639,8 +653,8 @@ h4[class*="glitch"] .flair-circle {
   display: block;
 }
 
-.works.is-filtered .works__stage,
-.works.is-filtered .scrolling-text {
+/* se lleva por delante también al riel del título, que cuelga de él */
+.works.is-filtered .works__stage {
   display: none;
 }
 
@@ -1136,25 +1150,24 @@ h4[class*="glitch"] .flair-circle {
     --zoom1: 1;
     --tile-w: 84vw;
     --tile-h: 52.5vw; /* 16:10 */
+
+    /* mismos números de siempre multiplicados por el --zoom0 de teléfono
+       (0.62): el título se ve igual que se veía en reposo, fijo */
+    --hero-fs: 27.28vw;
   }
 
-  /* mismos números de siempre multiplicados por el --zoom0 de teléfono
-     (0.62): el título se ve igual que se veía en reposo, fijo */
   .scrolling-text {
-    height: 29.76vw;
     margin-bottom: 1.86vw;
   }
 
   .scrolling-text .rail h4 {
-    font-size: 27.28vw;
     margin-right: 16px;
   }
 
-  /* el mismo cuerpo que el riel. Las palabras que no entren a este tamaño las
-     achica site.ts, que es el único que sabe cuánto mide cada una */
+  /* la isla del filtro baja para no taparse con la marca y el selector de
+     idioma: el título de la categoría tiene que bajar con ella */
   .filter-title {
-    font-size: 27.28vw;
-    padding-top: clamp(70px, 20vw, 100px);
+    padding-top: clamp(116px, 30vw, 150px);
   }
 
   .flair-star {

@@ -205,4 +205,19 @@ const L = IDIOMA_BASE;
   transition: opacity .15s;
 }
 .menu-link:hover .link-num { opacity: 1; }
+
+/* ── TELÉFONOS ──
+   Abierta, la isla mide 90vw: a la altura del header se le montaba encima y
+   tapaba la marca y el selector de idioma, que en 375px están a los bordes.
+   Baja lo justo para pasar por debajo de esa línea (el header ocupa
+   var(--pad) + 13.5px de texto) y el panel la sigue */
+@media (max-width: 700px) {
+  .island {
+    top: 3.5rem;
+  }
+
+  .menu-panel {
+    top: 7.25rem;
+  }
+}
 </style>

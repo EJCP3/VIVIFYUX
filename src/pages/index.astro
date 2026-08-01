@@ -56,42 +56,43 @@ const porCategoria = categorias.map((c) => ({
 
   <!-- ===== capítulo de trabajos: el zoom-out de la grilla ===== -->
   <section class="works" id="catalogo">
-    <!-- ===== HERO MARQUEE (INCAMANA STYLE) =====
-         Hermano de .works__stage, no hijo: no lleva el zoom del scroll
-         encima. Tamaño fijo siempre, corre igual haya o no un filtro puesto -->
-    <div class="scrolling-text">
-      <div class="rail">
-        {RIEL.map((palabra) => (
-          /* las dos versiones viajan en data-palabra-*: el h4 no puede usar el
-             data-en/data-es genérico porque su textContent se llevaría puesto
-             el .flair y los spans por letra. Lo reescribe site.ts */
-          <h4
-            data-text={palabra[L]}
-            data-palabra-en={palabra.en}
-            data-palabra-es={palabra.es}
-            data-cuelume-press="tick">
-            <div class="flair">
-              <svg class="flair-star" viewBox="0 0 100 100">
-                <g fill="currentColor">
-                  <rect x="42" y="0" width="16" height="100" rx="8" />
-                  <rect x="0" y="42" width="100" height="16" rx="8" />
-                  <rect x="42" y="0" width="16" height="100" rx="8" transform="rotate(45 50 50)" />
-                  <rect x="42" y="0" width="16" height="100" rx="8" transform="rotate(-45 50 50)" />
-                </g>
-              </svg>
-              <svg class="flair-circle" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="35" stroke="currentColor" stroke-width="20" fill="none" />
-              </svg>
-            </div>
-            {palabra[L].split('').map((letra) => (
-              <span>{letra}</span>
-            ))}
-          </h4>
-        ))}
-      </div>
-    </div>
-
     <div class="works__stage">
+      <!-- ===== HERO MARQUEE (INCAMANA STYLE) =====
+           Hijo de .works__stage pero hermano de .works__scaler: entra en el
+           encuadre fijo del sticky, no en el flujo, y no lleva el zoom del
+           scroll encima. Tamaño fijo siempre; measure() le pone el `top` -->
+      <div class="scrolling-text">
+        <div class="rail">
+          {RIEL.map((palabra) => (
+            /* las dos versiones viajan en data-palabra-*: el h4 no puede usar el
+               data-en/data-es genérico porque su textContent se llevaría puesto
+               el .flair y los spans por letra. Lo reescribe site.ts */
+            <h4
+              data-text={palabra[L]}
+              data-palabra-en={palabra.en}
+              data-palabra-es={palabra.es}
+              data-cuelume-press="tick">
+              <div class="flair">
+                <svg class="flair-star" viewBox="0 0 100 100">
+                  <g fill="currentColor">
+                    <rect x="42" y="0" width="16" height="100" rx="8" />
+                    <rect x="0" y="42" width="100" height="16" rx="8" />
+                    <rect x="42" y="0" width="16" height="100" rx="8" transform="rotate(45 50 50)" />
+                    <rect x="42" y="0" width="16" height="100" rx="8" transform="rotate(-45 50 50)" />
+                  </g>
+                </svg>
+                <svg class="flair-circle" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="35" stroke="currentColor" stroke-width="20" fill="none" />
+                </svg>
+              </div>
+              {palabra[L].split('').map((letra) => (
+                <span>{letra}</span>
+              ))}
+            </h4>
+          ))}
+        </div>
+      </div>
+
       <div class="works__scaler">
         <div class="rows">
           {

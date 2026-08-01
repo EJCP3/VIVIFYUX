@@ -45,13 +45,20 @@ export function setupWorks() {
 
     const contentH = scaler!.offsetHeight;
 
+    /* el título y la primera fila viajan juntos y se centran en la ventana.
+       Los dos viven dentro del sticky, así que el encuadre inicial no cuesta
+       scroll: desde el primer píxel que se baja, el zoom ya está corriendo */
     const heroH = hero
       ? hero.offsetHeight + (parseFloat(getComputedStyle(hero).marginBottom) || 0)
       : 0;
     const gapChico = movil ? 16 : 32;
-    const topInicial = gapChico;
-    const sobra = Math.max(0, vh - (rowH + gapY) * scaleFrom - heroH - gapChico);
-    if (hero) hero.style.marginTop = `${sobra.toFixed(1)}px`;
+    const filaH = (rowH + gapY) * scaleFrom;
+    /* en una ventana normal el reparto deja al título muy por debajo del
+       header y de la isla; el mínimo solo entra en ventanas tan bajas que el
+       bloque ya no cabe, y ahí vale más pegarlo arriba que solaparlo */
+    const topHero = Math.max(gapChico, (vh - heroH - filaH) / 2);
+    if (hero) hero.style.top = `${topHero.toFixed(1)}px`;
+    const topInicial = topHero + heroH;
     shiftFrom = topInicial - vh / 2 + (contentH * scaleFrom) / 2;
 
     const medioFinal = rowH + gapY / 2;
@@ -65,14 +72,38 @@ export function setupWorks() {
 
   const ease = gsap.parseEase('power2.inOut');
 
+  /* el título ya no se va solo con el scroll: vive dentro del sticky y se
+     queda quieto. Se aparta a mano mientras las filas crecen a ocupar la
+     pantalla, para no quedar encima de ellas */
+  function pintarHero(e: number) {
+    if (!hero) return;
+    const f = 1 - Math.min(1, Math.max(0, e) / 0.3);
+    hero.style.opacity = f.toFixed(3);
+    hero.style.transform = `translateY(${(-24 * (1 - f)).toFixed(1)}px)`;
+    hero.style.pointerEvents = f < 0.05 ? 'none' : '';
+  }
+
+  /** el avance que representa la escala puesta ahora mismo en el scaler: al
+   *  volver de una ficha el transform llega restaurado del historial y todavía
+   *  no pasó ningún onUpdate, así que `progress` aún vale 0 */
+  function avanceSegunEscala() {
+    const puesta = scaler!.style.transform.match(/scale\(([\d.]+)\)/);
+    if (!puesta || scaleTo <= scaleFrom) return 0;
+    return gsap.utils.clamp(0, 1, (parseFloat(puesta[1]) - scaleFrom) / (scaleTo - scaleFrom));
+  }
+
   function apply() {
-    if (window._vtRestoring) return;
     if (works!.classList.contains('is-filtered')) return;
+    if (window._vtRestoring) {
+      pintarHero(avanceSegunEscala());
+      return;
+    }
     const e = ease(progress);
     const s = scaleFrom + (scaleTo - scaleFrom) * e;
     const shift = shiftFrom + (shiftTo - shiftFrom) * e;
     scaleNow = s;
     scaler!.style.transform = `translate(-50%, calc(-50% + ${shift.toFixed(2)}px)) scale(${s.toFixed(4)})`;
+    pintarHero(e);
   }
 
   measure();
