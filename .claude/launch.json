@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "vivifyux-dev",
-      "runtimeExecutable": "npm",
+      "runtimeExecutable": "pnpm",
       "runtimeArgs": ["run", "dev"],
       "port": 4321
     }

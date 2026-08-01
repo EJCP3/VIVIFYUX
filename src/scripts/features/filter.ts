@@ -175,11 +175,24 @@ export function setupFilterIsland() {
     });
   }
 
+  /** deja la vista en el arranque del catálogo.
+   *
+   *  Sin animación a propósito: esto siempre pasa tapado por el barrido del
+   *  glimm, así que un recorrido suave no se vería, y con la grilla cambiando
+   *  de alto de golpe el suave se atasca.
+   *
+   *  Se mueve a mano y después se le avisa a Lenis, en vez de dejarle el
+   *  trabajo a él. Al esconder las tarjetas la página encoge y el navegador
+   *  recorta el scroll por su cuenta, pero Lenis no se entera hasta el
+   *  fotograma siguiente: mientras tanto su cuenta está vieja, y con ella
+   *  resuelve mal el destino de un elemento (`rect.top + animatedScroll`) o
+   *  directamente se salta la llamada por creer que ya estaba ahí */
   function irACatalogo() {
     const el = document.getElementById('catalogo');
     if (!el) return;
-    if (globalState.lenis) globalState.lenis.scrollTo(el, { offset: -20, duration: 0.6 });
-    else el.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' });
+    const y = Math.max(0, el.getBoundingClientRect().top + window.scrollY - 20);
+    window.scrollTo(0, y);
+    globalState.lenis?.scrollTo(y, { immediate: true, force: true });
   }
 
   /** las tarjetas que le tocan a un filtro; "all" se las lleva todas */
@@ -216,10 +229,12 @@ export function setupFilterIsland() {
       tile.style.display = aMostrar.has(tile) ? '' : 'none';
     });
 
-    if (!yaFiltrado) {
-      window.dispatchEvent(new Event('resize'));
-      if (animar) irACatalogo();
-    }
+    if (!yaFiltrado) window.dispatchEvent(new Event('resize'));
+
+    // siempre, no solo al entrar al filtro: saltar de una categoría con muchas
+    // librerías a una con pocas dejaba la vista a la altura de antes, que en la
+    // grilla nueva ya es el pie de la página
+    if (animar) irACatalogo();
 
     // las tarjetas que entran son otras: los disparadores viejos no valen
     matarBatchTiles();
