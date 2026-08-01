@@ -4,3 +4,5 @@ node_modules
 .env
 desing.md
 scripts
+dist/
+.astro/

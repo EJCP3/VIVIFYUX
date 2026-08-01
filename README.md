@@ -1,38 +1,28 @@
 # VivifyUX
 
-Directorio de librerías de interacción para la web: scroll, texto,
-transiciones, efectos, sonido y motores de animación. Cada ficha resume qué
-hace la librería, con qué está hecha y enlaza a su sitio y a su paquete de npm.
-El catálogo corre con las mismas librerías que cataloga.
+[English Version](README.md) | [Versión en Español](README.es.md)
 
+Directory of interaction libraries for the web: scroll, text, transitions, effects, sound, and animation engines. Each card summarizes what the library does, what it's made with, and links to its site and npm package. The catalog runs on the same libraries it catalogs.
 
-[Proponer una librería](https://github.com/EJCP3/VIVIFYUX-/issues/new) ·
-[Reportar un fallo](https://github.com/EJCP3/VIVIFYUX-/issues) ·
-[Guía de contribución](CONTRIBUTING.md)
+[Propose a library](https://github.com/EJCP3/VIVIFYUX-/issues/new) ·
+[Report a bug](https://github.com/EJCP3/VIVIFYUX-/issues) ·
+[Contributing Guide](CONTRIBUTING.md)
 
-## Cómo correrlo
+## How to run it
 
 ```bash
 npm install
 npm run dev       # http://localhost:4321
-npm run build     # genera /dist
+npm run build     # generates /dist
 ```
 
-## Contribuir
+## Contributing
 
-Cualquiera puede sumar una librería al catálogo. Antes de abrir un PR leé la
-[guía de contribución](CONTRIBUTING.md): explica qué campos lleva una ficha,
-cómo tiene que ser la captura y cómo probarla en local. Si no querés tocar
-código, alcanza con
-[abrir un issue](https://github.com/EJCP3/VIVIFYUX-/issues/new).
+Anyone can add a library to the catalog. Before opening a PR, read the [contributing guide](CONTRIBUTING.md): it explains what fields a card needs, how the screenshot should be, and how to test it locally. If you don't want to touch code, just [open an issue](https://github.com/EJCP3/VIVIFYUX-/issues/new).
 
-## Cómo está hecho
+## How it's made
 
-- [Astro](https://astro.build) — contenido en colecciones y View Transitions
-  entre la grilla y la ficha
-- [GSAP](https://gsap.com) — ScrollTrigger para el zoom de la grilla y las
-  marquesinas horizontales
-- [Lenis](https://lenis.dev) — scroll suave
-- [Cuelume](https://www.npmjs.com/package/cuelume) — sonidos de interfaz
-
-
+- [Astro](https://astro.build) — content in collections and View Transitions between the grid and the card
+- [GSAP](https://gsap.com) — ScrollTrigger for the grid zoom and horizontal marquees
+- [Lenis](https://lenis.dev) — smooth scrolling
+- [Cuelume](https://www.npmjs.com/package/cuelume) — interface sounds

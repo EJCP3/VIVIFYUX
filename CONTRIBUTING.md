@@ -1,48 +1,41 @@
-# Cómo sumar una librería
+# How to add a library
 
-Gracias por querer aportar. El catálogo se arma con lo que propone quien lo
-usa, así que toda sugerencia es bienvenida.
+[English Version](CONTRIBUTING.md) | [Versión en Español](CONTRIBUTING.es.md)
 
-Hay dos caminos: **abrir un issue** (nosotros la damos de alta) o **mandar un
-pull request** con la ficha ya hecha. Las dos valen lo mismo.
+Thank you for wanting to contribute. The catalog is built with what its users propose, so every suggestion is welcome.
 
----
-
-## Qué entra en el catálogo
-
-VivifyUX lista librerías de **interacción** para la web. Antes de proponer una,
-comprobá que cumpla esto:
-
-- Resuelve algo de interacción o movimiento en el navegador: scroll, texto,
-  transiciones, efectos visuales, sonido o animación general.
-- Es pública y se puede usar hoy: repositorio abierto o paquete publicado.
-- Tiene documentación o una demo donde se vea funcionando.
-- No está ya en el catálogo. Revisá
-  [`src/content/librerias/`](src/content/librerias/) antes de escribir.
-
-No hace falta que sea popular ni que tenga muchas estrellas. Sí que se entienda
-qué hace y que alguien pueda instalarla. hasta puede ser tuya la libreria.
-
-
+There are two ways: **open an issue** (we add it) or **submit a pull request** with the card already made. Both are equally valid.
 
 ---
 
-## Camino corto: abrir un issue
+## What goes into the catalog
 
-Si no querés tocar código,
-[abrí un issue](https://github.com/EJCP3/VIVIFYUX-/issues/new) con:
+VivifyUX lists **interaction** libraries for the web. Before proposing one, make sure it meets the following:
 
-- Nombre de la librería y enlace a su sitio o repositorio.
-- Una línea sobre qué hace.
-- En qué categoría te parece que va.
+- Solves something related to interaction or movement in the browser: scroll, text, transitions, visual effects, sound, or general animation.
+- It is public and can be used today: open repository or published package.
+- Has documentation or a demo where it can be seen working.
+- Is not already in the catalog. Check [`src/content/librerias/`](src/content/librerias/) before writing.
 
-Con eso alcanza. Nosotros preparamos la ficha y la captura.
+It doesn't need to be popular or have many stars. It just needs to be clear what it does and that someone can install it. It can even be your own library.
 
 ---
 
-## Camino largo: mandar un pull request
+## Short way: open an issue
 
-### 1. Preparar el proyecto
+If you don't want to touch code, [open an issue](https://github.com/EJCP3/VIVIFYUX-/issues/new) with:
+
+- Name of the library and link to its site or repository.
+- One line about what it does.
+- Which category you think it belongs in.
+
+That's enough. We will prepare the card and the screenshot.
+
+---
+
+## Long way: submit a pull request
+
+### 1. Prepare the project
 
 ```bash
 git clone https://github.com/EJCP3/VIVIFYUX-.git
@@ -51,34 +44,26 @@ npm install
 npm run dev       # http://localhost:4321
 ```
 
-Trabajá en una rama aparte:
+Work on a separate branch:
 
 ```bash
-git checkout -b agregar-nombre-de-la-libreria
+git checkout -b add-library-name
 ```
 
-### 2. Agregar la captura
+### 2. Add the screenshot
 
-Guardá una imagen en `src/assets/<slug>.webp`, donde `<slug>` es el nombre en
-minúsculas y sin espacios (`slot-text`, `gsap`, `border-beam`). Tambien puede enviar una imagen guardadad en algun storage externo y proporcionar la URL.
+Save an image in `src/assets/<slug>.webp`, where `<slug>` is the name in lowercase and without spaces (`slot-text`, `gsap`, `border-beam`). You can also send an image saved in external storage and provide the URL.
 
-- **Formato**: WebP.
-- **Tamaño**: alrededor de **1860 × 975** px, que es el de las capturas que ya
-  están. Más grande no aporta; bastante más chica se ve borrosa en la ficha.
-- **Qué capturar**: la portada de la librería o su demo, tal como se ve. Sin
-  barra del navegador, sin cursor, sin marcos ni sombras añadidas.
-- **Composición**: tanto la tarjeta de la grilla como la ficha recortan la
-  imagen con `object-fit: cover`, y la ficha es casi cuadrada, así que **recorta
-  por los costados**. Dejá lo importante hacia el centro.
+- **Format**: WebP.
+- **Size**: around **1860 × 975** px, which is the size of the existing screenshots. Larger doesn't help; much smaller looks blurry on the card.
+- **What to capture**: the cover of the library or its demo, as it is seen. No browser bar, no cursor, no added frames or shadows.
+- **Composition**: both the grid card and the detail card crop the image with `object-fit: cover`, and the detail card is almost square, so **it crops from the sides**. Leave the important part towards the center.
 
-### 3. Crear la ficha
+### 3. Create the card
 
-Un archivo por librería en `src/content/librerias/<slug>.md`. El nombre del
-archivo es la URL: `slot-text.md` → `/libreria/slot-text/`.
+One file per library in `src/content/librerias/<slug>.md`. The name of the file is the URL: `slot-text.md` → `/libreria/slot-text/`.
 
-El sitio es bilingüe: los textos que se leen en pantalla van en inglés y en
-español dentro del mismo archivo, y el botón EN/ES del encabezado cambia entre
-uno y otro sin recargar.
+The site is bilingual: the texts read on screen go in English and Spanish within the same file, and the EN/ES button in the header switches between them without reloading.
 
 ```md
 ---
@@ -102,59 +87,52 @@ orden: 11
 ---
 ```
 
-Los campos están validados en
-[`src/content/config.ts`](src/content/config.ts): si falta uno o el tipo no
-corresponde, `npm run dev` te lo dice con el nombre del campo.
+The fields are validated in [`src/content/config.ts`](src/content/config.ts): if one is missing or the type doesn't match, `npm run dev` will tell you with the field name.
 
-| Campo | Tipo | ¿Obligatorio? | Notas |
+| Field | Type | Required? | Notes |
 | --- | --- | --- | --- |
-| `nombre` | texto | Sí | Como lo escribe su autor: `GSAP`, `Lenis`, `slot-text`. |
-| `categoria` | `scroll`, `text`, `transitions`, `effects`, `sound`, `engine`, `components` o `generators` | Sí | Una sola. Son las ocho del filtro; no se inventan nuevas en un PR de alta. |
-| `claim` | `en` + `es` | Sí | Una línea en cada idioma, la que se lee bajo el título de la ficha. Sin punto final si es un lema. |
-| `descripcion` | `en` + `es` | Sí | Dos a cuatro frases por idioma: qué hace y por qué importa. Es el cuerpo de la ficha. |
-| `tips` | lista de `en` + `es` | No | Dos apuntes prácticos. La ficha no muestra el bloque hasta que los dos idiomas tengan texto, así que se puede dejar vacío y completarlo después. |
-| `url` | URL completa | Sí | Sitio oficial; si no tiene, el repositorio. Con `https://`. |
-| `npm` | texto | No | Nombre exacto del paquete, tal cual se instala. Omitilo si no se publica en npm. |
-| `imagen` | ruta | Sí | Siempre `../../assets/<slug>.webp`. |
-| `orden` | número | Sí | Posición en la grilla y en el anterior/siguiente. Usá el siguiente número libre. |
+| `nombre` | text | Yes | As the author writes it: `GSAP`, `Lenis`, `slot-text`. |
+| `categoria` | `scroll`, `text`, `transitions`, `effects`, `sound`, `engine`, `components` or `generators` | Yes | Only one. These are the eight in the filter; no new ones are invented in an addition PR. |
+| `claim` | `en` + `es` | Yes | One line per language, read under the card title. No period if it's a slogan. |
+| `descripcion` | `en` + `es` | Yes | Two to four sentences per language: what it does and why it matters. It is the body of the card. |
+| `tips` | list of `en` + `es` | No | Two practical tips. The card doesn't show the block until both languages have text, so it can be left empty and completed later. |
+| `url` | full URL | Yes | Official site; if none, the repository. With `https://`. |
+| `npm` | text | No | Exact name of the package, as installed. Omit if not published on npm. |
+| `imagen` | path | Yes | Always `../../assets/<slug>.webp`. |
+| `orden` | number | Yes | Position in the grid and in prev/next. Use the next free number. |
 
-### 4. Probar antes de mandar
+### 4. Test before submitting
 
-Con `npm run dev` abierto, revisá que:
+With `npm run dev` running, check that:
 
-- La tarjeta aparece en la grilla con su nombre y categoría.
-- Al hacer click, la imagen viaja a la ficha sin saltos.
-- La ficha se lee bien: claim, descripción, chips y el botón **Ver sitio** abre
-  la página correcta.
-- El anterior/siguiente encadena con las librerías de al lado.
+- The card appears in the grid with its name and category.
+- When clicked, the image transitions to the card without jumping.
+- The card reads well: claim, description, chips, and the **Visit site** button opens the correct page.
+- The prev/next links chain with the adjacent libraries.
 
-Y que compile limpio:
+And that it builds cleanly:
 
 ```bash
 npm run build
 ```
 
-No hace falta que subas `dist/` en el PR.
+You do not need to upload `dist/` in the PR.
 
-### 5. Abrir el pull request
+### 5. Open the pull request
 
-Un PR por librería. En la descripción, contá en una línea por qué merece estar
-y pegá el enlace a su sitio.
+One PR per library. In the description, tell in one line why it deserves to be included and paste the link to its site.
 
 ---
 
-## Qué miramos al revisar
+## What we look for when reviewing
 
-- Que la librería cumpla lo de arriba y no esté repetida.
-- Que la categoría sea la que uno esperaría al buscarla.
-- Que la descripción explique la librería y no la venda.
-- Que la captura se vea nítida y no quede recortada por la mitad.
+- That the library meets the requirements above and is not repeated.
+- That the category is the one someone would expect when searching for it.
+- That the description explains the library and does not sell it.
+- That the screenshot looks sharp and is not cropped in half.
 
-Si algo no encaja lo comentamos en el PR; casi siempre se arregla cambiando una
-categoría o volviendo a sacar la captura.
+If something doesn't fit, we'll comment on the PR; it's almost always fixed by changing a category or retaking the screenshot.
 
-## Otras contribuciones
+## Other contributions
 
-Los arreglos de bugs, accesibilidad, rendimiento o textos también son
-bienvenidos, con las mismas dos vías: issue o PR. Si el cambio es grande,
-mejor abrir antes un issue para acordar el enfoque.
+Fixes for bugs, accessibility, performance, or texts are also welcome, via the same two channels: issue or PR. If the change is large, it's better to open an issue first to agree on the approach.

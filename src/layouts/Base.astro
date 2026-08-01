@@ -24,12 +24,14 @@ const L = IDIOMA_BASE;
 <!doctype html>
 <html lang={L}>
   <head>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {/* los dos idiomas viajan en el propio <title>: el script cambia document.title sin pedir nada al servidor */}
     <title data-titulo-en={title.en} data-titulo-es={title.es}>{title[L]}</title>
     <meta name="description" content={description[L]} data-i18n-attr="content" data-en={description.en} data-es={description.es} />
     <link rel="preconnect" href="https://api.fontshare.com" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
     <link
       rel="stylesheet"
