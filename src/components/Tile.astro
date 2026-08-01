@@ -1,16 +1,19 @@
 ---
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { CATEGORIAS, IDIOMA_BASE, altCaptura, type Categoria } from '../i18n';
 
 interface Props {
   slug: string;
   nombre: string;
-  categoria: string;
+  categoria: Categoria;
   imagen: ImageMetadata;
   isCopy?: boolean;
 }
 
 const { slug, nombre, categoria, imagen, isCopy = false } = Astro.props;
+const L = IDIOMA_BASE;
+const etiqueta = CATEGORIAS[categoria];
 ---
 
 <a class="tile" href={`/libreria/${slug}/`} data-vt={`cover-${slug}`} data-copy={isCopy ? "true" : undefined}>
@@ -21,14 +24,23 @@ const { slug, nombre, categoria, imagen, isCopy = false } = Astro.props;
          se ensucia al comprimir -->
     <Image
       src={imagen}
-      alt={`Captura del sitio de ${nombre}`}
+      alt={altCaptura(nombre, L)}
       widths={[600, 900, 1400, 1800]}
       sizes="(max-width: 900px) 92vw, 58vw"
       quality={88}
+      data-i18n-attr="alt"
+      data-en={altCaptura(nombre, 'en')}
+      data-es={altCaptura(nombre, 'es')}
     />
   </div>
   <div class="tile__meta">
     <span class="tile__name">{nombre}</span>
-    <span class="tile__cat">../{categoria}</span>
+    {/* el slug de la categoría vive en data-categoria y no en el texto: el
+        filtro empareja por ahí, así la etiqueta puede traducirse sin romperlo */}
+    <span
+      class="tile__cat"
+      data-categoria={categoria}
+      data-en={`../${etiqueta.en}`}
+      data-es={`../${etiqueta.es}`}>../{etiqueta[L]}</span>
   </div>
 </a>

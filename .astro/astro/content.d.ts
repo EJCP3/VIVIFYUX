@@ -141,9 +141,23 @@ declare module 'astro:content' {
 
 	type ContentEntryMap = {
 		"librerias": {
+"balloons.md": {
+	id: "balloons.md";
+  slug: "balloons";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
 "beam.md": {
 	id: "beam.md";
   slug: "beam";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
+"bklit.md": {
+	id: "bklit.md";
+  slug: "bklit";
   body: string;
   collection: "librerias";
   data: InferEntrySchema<"librerias">
@@ -158,6 +172,27 @@ declare module 'astro:content' {
 "cuelume.md": {
 	id: "cuelume.md";
   slug: "cuelume";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
+"deltached.md": {
+	id: "deltached.md";
+  slug: "deltached";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
+"feralui.md": {
+	id: "feralui.md";
+  slug: "feralui";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
+"glass.md": {
+	id: "glass.md";
+  slug: "glass";
   body: string;
   collection: "librerias";
   data: InferEntrySchema<"librerias">
@@ -183,9 +218,30 @@ declare module 'astro:content' {
   collection: "librerias";
   data: InferEntrySchema<"librerias">
 } & { render(): Render[".md"] };
+"liquid-glass.md": {
+	id: "liquid-glass.md";
+  slug: "liquid-glass";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
+"math-curve-loaders.md": {
+	id: "math-curve-loaders.md";
+  slug: "math-curve-loaders";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
 "metal.md": {
 	id: "metal.md";
   slug: "metal";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
+"motion-core.md": {
+	id: "motion-core.md";
+  slug: "motion-core";
   body: string;
   collection: "librerias";
   data: InferEntrySchema<"librerias">
@@ -197,6 +253,41 @@ declare module 'astro:content' {
   collection: "librerias";
   data: InferEntrySchema<"librerias">
 } & { render(): Render[".md"] };
+"oreo-avatar.md": {
+	id: "oreo-avatar.md";
+  slug: "oreo-avatar";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
+"pocoloco.md": {
+	id: "pocoloco.md";
+  slug: "pocoloco";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
+"react-bits.md": {
+	id: "react-bits.md";
+  slug: "react-bits";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
+"sileo.md": {
+	id: "sileo.md";
+  slug: "sileo";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
+"slither-charts.md": {
+	id: "slither-charts.md";
+  slug: "slither-charts";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
 "slot-text.md": {
 	id: "slot-text.md";
   slug: "slot-text";
@@ -204,9 +295,44 @@ declare module 'astro:content' {
   collection: "librerias";
   data: InferEntrySchema<"librerias">
 } & { render(): Render[".md"] };
+"soundcn.md": {
+	id: "soundcn.md";
+  slug: "soundcn";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
+"theme-toggle.md": {
+	id: "theme-toggle.md";
+  slug: "theme-toggle";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
 "transitions.md": {
 	id: "transitions.md";
   slug: "transitions";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
+"uiverse.md": {
+	id: "uiverse.md";
+  slug: "uiverse";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
+"watermelon.md": {
+	id: "watermelon.md";
+  slug: "watermelon";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
+"wissfort.md": {
+	id: "wissfort.md";
+  slug: "wissfort";
   body: string;
   collection: "librerias";
   data: InferEntrySchema<"librerias">

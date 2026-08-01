@@ -76,16 +76,28 @@ minúsculas y sin espacios (`slot-text`, `gsap`, `border-beam`). Tambien puede e
 Un archivo por librería en `src/content/librerias/<slug>.md`. El nombre del
 archivo es la URL: `slot-text.md` → `/libreria/slot-text/`.
 
+El sitio es bilingüe: los textos que se leen en pantalla van en inglés y en
+español dentro del mismo archivo, y el botón EN/ES del encabezado cambia entre
+uno y otro sin recargar.
+
 ```md
 ---
 nombre: "Rive"
-categoria: "efectos"
-claim: "Animaciones vectoriales interactivas en tiempo real."
-descripcion: "Editor y runtime para animaciones vectoriales que responden a estados. Se exporta un archivo y el runtime lo reproduce en canvas, con máquinas de estado en vez de líneas de tiempo fijas."
+categoria: "effects"
+claim:
+  en: "Interactive vector animation in real time."
+  es: "Animaciones vectoriales interactivas en tiempo real."
+descripcion:
+  en: "An editor and runtime for vector animation that reacts to state. You export one file and the runtime plays it on canvas, driven by state machines instead of fixed timelines."
+  es: "Editor y runtime para animaciones vectoriales que responden a estados. Se exporta un archivo y el runtime lo reproduce en canvas, con máquinas de estado en vez de líneas de tiempo fijas."
+tips:
+  - en: "Export a single .riv file and load it once: each extra file is another request."
+    es: "Exportá un único archivo .riv y cargalo una sola vez: cada archivo extra es otra petición."
+  - en: "State machines replace timeline scrubbing — drive them with inputs, not with seek()."
+    es: "Las máquinas de estado reemplazan el barrido de la línea de tiempo: movelas con inputs, no con seek()."
 url: "https://rive.app"
 npm: "@rive-app/canvas"
 imagen: "../../assets/rive.webp"
-stack: ["Canvas", "Máquinas de estado", "Runtime propio"]
 orden: 11
 ---
 ```
@@ -97,13 +109,13 @@ corresponde, `npm run dev` te lo dice con el nombre del campo.
 | Campo | Tipo | ¿Obligatorio? | Notas |
 | --- | --- | --- | --- |
 | `nombre` | texto | Sí | Como lo escribe su autor: `GSAP`, `Lenis`, `slot-text`. |
-| `categoria` | `scroll`, `texto`, `transiciones`, `efectos`, `sonido` o `motor` | Sí | Una sola. Son las seis del filtro; no se inventan nuevas en un PR de alta. |
-| `claim` | texto | Sí | Una línea, la que se lee bajo el título de la ficha. Sin punto final si es un lema. |
-| `descripcion` | texto | Sí | Dos a cuatro frases: qué hace y por qué importa. Es el cuerpo de la ficha. |
+| `categoria` | `scroll`, `text`, `transitions`, `effects`, `sound`, `engine`, `components` o `generators` | Sí | Una sola. Son las ocho del filtro; no se inventan nuevas en un PR de alta. |
+| `claim` | `en` + `es` | Sí | Una línea en cada idioma, la que se lee bajo el título de la ficha. Sin punto final si es un lema. |
+| `descripcion` | `en` + `es` | Sí | Dos a cuatro frases por idioma: qué hace y por qué importa. Es el cuerpo de la ficha. |
+| `tips` | lista de `en` + `es` | No | Dos apuntes prácticos. La ficha no muestra el bloque hasta que los dos idiomas tengan texto, así que se puede dejar vacío y completarlo después. |
 | `url` | URL completa | Sí | Sitio oficial; si no tiene, el repositorio. Con `https://`. |
 | `npm` | texto | No | Nombre exacto del paquete, tal cual se instala. Omitilo si no se publica en npm. |
-| `imagen` | ruta | Sí | Siempre `../../assets/<slug>.png`. |
-| `stack` | lista de textos | Sí, mínimo uno | Con qué está construida. Salen como chips en la ficha. |
+| `imagen` | ruta | Sí | Siempre `../../assets/<slug>.webp`. |
 | `orden` | número | Sí | Posición en la grilla y en el anterior/siguiente. Usá el siguiente número libre. |
 
 ### 4. Probar antes de mandar

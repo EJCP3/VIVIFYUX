@@ -1,12 +1,13 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Draggable } from 'gsap/Draggable';
 import { Observer } from 'gsap/Observer';
 import Lenis from 'lenis';
 import { bind, play, setVolume } from 'cuelume';
 import 'lenis/dist/lenis.css';
+import { CATEGORIAS, t, type Categoria } from '../i18n';
+import { idiomaActual } from './idioma';
 
-gsap.registerPlugin(ScrollTrigger, Draggable, Observer);
+gsap.registerPlugin(ScrollTrigger, Observer);
 
 // cues reales de cuelume: 'chisme' no existía y dejaba mudo un tercio de los botones
 const pressSounds = ['tick', 'press', 'droplet'];
@@ -32,6 +33,8 @@ let rowsTick: (() => void) | null = null;
 let onResize: (() => void) | null = null;
 let abort: AbortController | null = null;
 let wordTimer: number | null = null;
+let filterTitleTl: gsap.core.Timeline | null = null;
+let marquesinaTl: gsap.core.Timeline | null = null;
 
 /* --- lo que el catálogo deja pendiente de restaurar al volver de una ficha --- */
 let pendingScrollY: number | null = null;
@@ -39,8 +42,12 @@ let pendingCarousel: (number | null)[] | null = null;
 
 const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/** alto de la caja del título en em, espejo de `height: calc(var(--wm-fs) * .9)` */
-const CAJA_TITULO = 0.9;
+/** espejo del breakpoint de teléfonos de global.css */
+const esMovil = () => window.matchMedia('(max-width: 700px)').matches;
+
+/** tope del empujón que el scroll le da a las filas, en px de pantalla por
+ *  fotograma (~7 veces la velocidad de crucero de la marquesina) */
+const BOOST_MAX = 3.5;
 
 function teardown() {
   ScrollTrigger.getAll().forEach((t) => t.kill());
@@ -48,8 +55,10 @@ function teardown() {
   if (rowsTick) gsap.ticker.remove(rowsTick);
   if (onResize) window.removeEventListener('resize', onResize);
   if (wordTimer) window.clearInterval(wordTimer);
+  filterTitleTl?.kill();
   lenis?.destroy();
   abort?.abort();
+  filterTitleTl = null;
   wordTimer = null;
   lenis = null;
   lenisTick = null;
@@ -112,6 +121,10 @@ function setupWorks() {
   const row0 = rows?.firstElementChild as HTMLElement | undefined;
   if (!rows || !row0) return;
 
+  // el título vive arriba de .works__stage, en flujo normal: .works__stage
+  // arranca desplazado ese alto sin que el JS haga nada
+  const hero = document.querySelector<HTMLElement>('.scrolling-text');
+
   // estado del zoom, recalculado en cada resize
   let scaleFrom = 1;
   let scaleTo = 2.2;
@@ -119,8 +132,6 @@ function setupWorks() {
   let shiftTo = 0;
   let scaleNow = 1;
   let progress = 0;
-
-  const marco = document.querySelector<HTMLElement>('.wordmark');
 
   function measure() {
     const vh = stage!.clientHeight;
@@ -135,36 +146,47 @@ function setupWorks() {
     const gapY = parseFloat(getComputedStyle(rows!).rowGap) || 0;
 
     // el zoom final no puede pasar de lo que deje entrar dos filas enteras:
-    // si se pasa, las recorta por arriba y por abajo y asoma la siguiente
+    // si se pasa, las recorta por arriba y por abajo y asoma la siguiente.
+    // El título ya no es parte de este cálculo: vive afuera de .works__scaler,
+    // a tamaño fijo, y no lo escala el scroll
     const dosFilas = rowH * 2 + gapY;
-    scaleTo = Math.max(scaleFrom, Math.min(scaleTo, (vh - 32) / dosFilas));
+    const movil = esMovil();
+    scaleTo = Math.max(scaleFrom, Math.min(scaleTo, (vh - (movil ? 24 : 32)) / dosFilas));
 
-    // el título manda mientras entre: en pantallas bajas se recorta lo justo
-    // para que la primera fila de tarjetas siga completa arriba del borde
-    if (marco) marco.style.removeProperty('--wm-fs');
-    const disponible = vh - 106;
-    let heroH = rows!.offsetTop; // caja del título
-    // el sobrante se mide en pantalla y se traduce a espacio de contenido
-    const sobra = (heroH + rowH) * scaleFrom - disponible;
-    if (marco && sobra > 0) {
-      const alto = marco.clientHeight;
-      const recortado = Math.max(alto - sobra / scaleFrom, (vh * 0.14) / scaleFrom);
-      marco.style.setProperty('--wm-fs', `${(recortado / CAJA_TITULO).toFixed(1)}px`);
-      heroH = rows!.offsetTop;
-    }
+    const contentH = scaler!.offsetHeight; // == dosFilas: .rows es el único hijo de .works__scaler
 
-    const contentH = scaler!.offsetHeight;
-
-    // al principio: la primera fila queda al ras del borde inferior
-    const topInicial = Math.max(24, vh - 10 - (heroH + rowH) * scaleFrom);
+    // el hueco entre título y primera fila es fijo y chico —como en la
+    // versión publicada, donde ambos vivían pegados dentro del mismo bloque
+    // que hace zoom—. Lo que sobra de pantalla ya no se acumula ahí: empuja
+    // el título hacia abajo con un margen superior, así el conjunto entero
+    // (título + grilla) baja junto en vez de separarse en dos mitades
+    const heroH = hero
+      ? hero.offsetHeight + (parseFloat(getComputedStyle(hero).marginBottom) || 0)
+      : 0;
+    const gapChico = movil ? 16 : 32;
+    const topInicial = gapChico;
+    // el hero enseña UNA sola fila: el encuadre termina justo donde arranca la
+    // segunda, que entra recién cuando el zoom del scroll abre el cuadro. Dos
+    // filas de golpe eran demasiada información para lo primero que se ve
+    const sobra = Math.max(
+      0,
+      vh - (rowH + gapY) * scaleFrom - heroH - gapChico,
+    );
+    if (hero) hero.style.marginTop = `${sobra.toFixed(1)}px`;
     shiftFrom = topInicial - vh / 2 + (contentH * scaleFrom) / 2;
 
-    // al final: el bloque de las dos filas queda centrado en la pantalla.
-    // Su mitad cae en el hueco entre ambas, a heroH + rowH + gapY/2 del inicio
-    shiftTo = scaleTo * (contentH / 2 - (heroH + rowH + gapY / 2));
+    // al final: las dos filas quedan centradas en la pantalla. Su mitad cae
+    // en el hueco entre ambas, a rowH + gapY/2 del borde superior del bloque
+    const medioFinal = rowH + gapY / 2;
+    shiftTo = scaleTo * (contentH / 2 - medioFinal);
 
-    // el recorrido del zoom dura ~3 pantallas + la altura del sticky
-    works!.style.height = `${Math.round(vh * 4)}px`;
+    // el recorrido del zoom dura ~3 pantallas + la altura del sticky.
+    // En teléfono se acorta: el mismo recorrido con el dedo se hace largo.
+    // Con un filtro activo .works vive en alto automático (lo ocupa la
+    // grilla estática, no el carrusel): no lo pisamos
+    if (!works!.classList.contains('is-filtered')) {
+      works!.style.height = `${Math.round(vh * (movil ? 3 : 4))}px`;
+    }
     apply();
   }
 
@@ -178,6 +200,9 @@ function setupWorks() {
 
   function apply() {
     if (window._vtRestoring) return;
+    // el carrusel está oculto entero mientras hay un filtro activo: seguir
+    // escribiendo el transform es inofensivo pero inútil
+    if (works!.classList.contains('is-filtered')) return;
     const e = ease(progress);
     const s = scaleFrom + (scaleTo - scaleFrom) * e;
     const shift = shiftFrom + (shiftTo - shiftFrom) * e;
@@ -232,18 +257,41 @@ function setupWorks() {
       isDragging: false
     };
 
+    // cuánto se movió el dedo en horizontal: sirve para distinguir un arrastre
+    // de un toque, porque las tarjetas son enlaces
+    let recorrido = 0;
+
     Observer.create({
       target: track,
       type: "pointer,touch",
+      // el eje se fija en el primer movimiento: sin esto, bajar la página con
+      // el dedo apoyado en una fila la arrastraba de costado a la vez
+      lockAxis: true,
       onPress() {
-        s.isDragging = true;
+        recorrido = 0;
       },
       onDrag(self) {
+        if (self.axis === 'y') return; // el gesto es scroll de la página
+        s.isDragging = true;
+        recorrido += Math.abs(self.deltaX);
         s.x += self.deltaX / scaleNow;
         s.dragVelocity = self.deltaX / scaleNow;
       },
       onRelease() {
         s.isDragging = false;
+        if (recorrido < 8) return; // fue un toque: que abra la ficha
+
+        // el click llega después del release: se traga uno solo, para que
+        // arrastrar la marquesina no termine abriendo una librería
+        const bloquear = (e: Event) => {
+          e.preventDefault();
+          e.stopPropagation();
+        };
+        track.addEventListener('click', bloquear, { capture: true, once: true });
+        window.setTimeout(
+          () => track.removeEventListener('click', bloquear, { capture: true }),
+          350,
+        );
       }
     });
 
@@ -266,9 +314,11 @@ function setupWorks() {
     const rect = works!.getBoundingClientRect();
     if (rect.bottom < 0 || rect.top > window.innerHeight) return;
 
-    // el desplazamiento se divide por la escala: con el zoom adentro las
-    // filas se ven más grandes, pero no más rápidas
-    const boost = (velocity * 0.35) / scaleNow;
+    // el empujón del scroll se topea ANTES de dividir por la escala: el tope
+    // es lo que se ve en pantalla. Sin él, un golpe de rueda (o la inercia de
+    // un deslizamiento en el móvil) disparaba la velocidad de Lenis y las filas
+    // salían despedidas
+    const boost = gsap.utils.clamp(-BOOST_MAX, BOOST_MAX, velocity * 0.12) / scaleNow;
     velocity *= 0.92;
 
     for (const s of state) {
@@ -336,7 +386,33 @@ const SIGNOS = [
   `<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="34" fill="none" stroke="#7b61ff" stroke-width="18"/></svg>`,
 ];
 
+/** deja cada palabra del riel en el idioma activo.
+ *
+ *  No lo hace pintarIdioma() con el data-en/data-es genérico porque ese
+ *  escribe textContent, y el h4 guarda además el .flair (las dos figuras que
+ *  asoman detrás). Acá se reemplazan solo los spans de letra. */
+function sincronizarPalabrasHero() {
+  const idioma = idiomaActual();
+
+  document.querySelectorAll<HTMLElement>('.scrolling-text .rail h4').forEach((h4) => {
+    const palabra = idioma === 'es' ? h4.dataset.palabraEs : h4.dataset.palabraEn;
+    if (!palabra || h4.dataset.text === palabra) return; // ya está en su idioma
+
+    h4.dataset.text = palabra; // el glitch lo lee para sus ::before/::after
+    h4.querySelectorAll(':scope > span').forEach((s) => s.remove());
+    for (const letra of palabra) {
+      const span = document.createElement('span');
+      span.textContent = letra;
+      h4.appendChild(span);
+    }
+  });
+}
+
 function setupSlotText() {
+  // antes de medir nada: el bucle horizontal se calcula con el ancho de cada
+  // palabra, y en español son otras
+  sincronizarPalabrasHero();
+
   const scrollingText = gsap.utils.toArray<HTMLElement>('.scrolling-text .rail h4');
   if (scrollingText.length === 0) return;
 
@@ -376,22 +452,22 @@ function setupSlotText() {
     const tl = horizontalLoop(scrollingText, {
       repeat: -1,
       paddingRight: parseFloat(getComputedStyle(scrollingText[0]).marginRight) || 0,
-      speed: 1.8 // Make the hero marquee slightly faster
+      speed: 1.00 // paso tranquilo: a 1.8 las palabras pasaban sin dar tiempo a leerlas
     });
 
-    // Enable dynamic speed based on scroll
+    // el scroll acelera el riel, pero con tope: el 6.25x de antes convertía
+    // cualquier golpe de rueda en un borrón ilegible
+    const RAFAGA = 2.2;
+
     Observer.create({
       target: window,
       type: "wheel,touch",
       onChangeY(self) {
-        let factor = 2.5;
-        if (self.deltaY < 0) {
-          factor *= -1; // Reverse direction on scroll up
-        }
-        
+        const sentido = self.deltaY < 0 ? -1 : 1; // hacia atrás si se sube
+
         gsap.timeline({ defaults: { ease: "none" } })
-          .to(tl, { timeScale: factor * 2.5, duration: 0.2, overwrite: true })
-          .to(tl, { timeScale: factor > 0 ? 1 : -1, duration: 1 }, "+=0.3"); // Return to normal speed (or reverse normal speed)
+          .to(tl, { timeScale: sentido * RAFAGA, duration: 0.3, overwrite: true })
+          .to(tl, { timeScale: sentido, duration: 1 }, "+=0.3"); // vuelve a la velocidad de crucero
       }
     });
 
@@ -818,7 +894,110 @@ function setupFooterReveal() {
   }
 }
 
-/* =========================================================
+/* la misma paleta del glitch del hero. El negro del final es --ink escrito a
+   mano: GSAP no sabe interpolar hacia una variable de CSS */
+const COLORES_TITULO = ['#ff4d8d', '#7b61ff', '#0ae448', '#0a0a0a'];
+
+/** una palabra larga ("TRANSITIONS") se pasa del ancho en pantallas angostas:
+ *  se achica lo justo para que entre. Hace falta JS porque el cuerpo depende
+ *  del largo del nombre, que el CSS no puede medir */
+function ajustarTituloFiltro(titulo: HTMLElement) {
+  const letras = Array.from(titulo.querySelectorAll<HTMLElement>('span'));
+  if (!letras.length) return;
+
+  // se mide siempre contra el cuerpo de la hoja, no contra el ya achicado
+  titulo.style.removeProperty('font-size');
+  const cs = getComputedStyle(titulo);
+  const disponible =
+    titulo.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const ancho = letras.reduce((suma, el) => suma + el.getBoundingClientRect().width, 0);
+
+  if (ancho > disponible && disponible > 0) {
+    const base = parseFloat(cs.fontSize);
+    titulo.style.fontSize = `${((base * disponible) / ancho).toFixed(1)}px`;
+  }
+}
+
+/** escribe la categoría activa en el título gigante y le deja corriendo lo
+ *  único que se mueve ahí: el color, que recorre las letras en cascada */
+// function pintarTituloFiltro(titulo: HTMLElement, texto: string) {
+//   filterTitleTl?.kill();
+//   filterTitleTl = null;
+
+//   const palabra = texto.toUpperCase();
+//   titulo.textContent = '';
+//   // las letras sueltas se leerían de a una: el nombre va en la etiqueta
+//   titulo.setAttribute('aria-label', palabra);
+
+//   const letras = palabra.split('').map((letra) => {
+//     const span = document.createElement('span');
+//     span.textContent = letra;
+//     span.setAttribute('aria-hidden', 'true');
+//     titulo.appendChild(span);
+//     return span;
+//   });
+
+//   ajustarTituloFiltro(titulo);
+
+//   if (reduced() || !letras.length) return;
+
+//   filterTitleTl = gsap.timeline({ repeat: -1 });
+//   for (const color of COLORES_TITULO) {
+//     filterTitleTl.to(letras, {
+//       color,
+//       duration: 0.45,
+//       stagger: 0.06,
+//       ease: 'sine.inOut',
+//     });
+//   }
+// }
+function pintarTituloFiltro(titulo: HTMLElement, texto: string) {
+  filterTitleTl?.kill();
+  filterTitleTl = null;
+
+  const palabra = texto.toUpperCase();
+  titulo.textContent = '';
+  // las letras sueltas se leerían de a una: el nombre va en la etiqueta
+  titulo.setAttribute('aria-label', palabra);
+
+  const letras = palabra.split('').map((letra) => {
+    const span = document.createElement('span');
+    span.textContent = letra;
+    span.setAttribute('aria-hidden', 'true');
+    titulo.appendChild(span);
+    return span;
+  });
+
+  ajustarTituloFiltro(titulo);
+
+  if (reduced() || !letras.length) return;
+
+  // 👇 NUEVO: Índice para recorrer tu arreglo de colores
+  let colorIndex = 0;
+
+  // Creamos una función que se llamará a sí misma al terminar
+  function animarLetraAleatoria() {
+    // 1. Elegimos una letra al azar del array en este instante exacto
+    const letra = gsap.utils.random(letras);
+    
+    // 2. Elegimos el color actual y avanzamos al siguiente para el próximo turno
+    const color = COLORES_TITULO[colorIndex % COLORES_TITULO.length];
+    colorIndex++;
+
+    // 3. Asignamos la animación a filterTitleTl para poder matarla (kill) después si es necesario
+    filterTitleTl = gsap.to(letra, {
+      color: color,
+      duration: 0.45,
+      yoyo: true,             // Importante: hace que la letra vuelva a su color original
+      repeat: 1,              // Va hacia el nuevo color y vuelve al normal
+      ease: 'sine.inOut',
+      onComplete: animarLetraAleatoria // 4. Cuando termina esta letra, ejecuta esta misma función de nuevo
+    });
+  }
+
+  // Arrancamos el ciclo infinito por primera vez
+  animarLetraAleatoria();
+}/* =========================================================
    7. Filter Island: Dynamic island style filter menu
    ========================================================= */
 function setupFilterIsland() {
@@ -860,7 +1039,7 @@ function setupFilterIsland() {
   function toggle() {
     isOpen = !isOpen;
     btn!.setAttribute('aria-expanded', String(isOpen));
-    btn!.setAttribute('aria-label', isOpen ? 'Cerrar menú' : 'Abrir menú de filtros');
+    btn!.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open filter menu');
     document.querySelectorAll('.menu-link').forEach(l => l.setAttribute('tabindex', isOpen ? '0' : '-1'));
     
     if (isOpen) {
@@ -889,91 +1068,114 @@ function setupFilterIsland() {
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   }, { signal: abort!.signal });
 
-  // Filtering Logic
+  // Filtering Logic: elegir una categoría cambia el carrusel horizontal por
+  // una grilla estática con esas tarjetas nada más — sin zoom, sin scroll-
+  // jacking. .works pasa a alto automático y .works__stage se esconde
+  // entero (ver .works.is-filtered en global.css); measure()/apply() en
+  // setupWorks respetan ese estado y no lo pisan.
   const links = document.querySelectorAll<HTMLElement>('.menu-link');
-  const tiles = document.querySelectorAll<HTMLElement>('.tile');
-  const rows = document.querySelector<HTMLElement>('.rows');
+  const works = document.querySelector<HTMLElement>('.works');
+  const filteredGrid = document.querySelector<HTMLElement>('.filtered-grid');
+  const filterTitle = document.querySelector<HTMLElement>('.filter-title');
+  const gridTiles = filteredGrid
+    ? Array.from(filteredGrid.querySelectorAll<HTMLElement>('.tile'))
+    : [];
 
-  // Initialize Draggable for the rows container
-  let gridDraggable: Draggable[] | null = null;
-  if (rows) {
-    gridDraggable = Draggable.create(rows, {
-      type: 'x,y',
-      edgeResistance: 0.65,
-      bounds: '.works__scaler',
-      inertia: false, // Standard drag without inertia plugin
+  // el cuerpo del título se calcula contra el ancho de pantalla: al cambiarlo
+  // hay que volver a medir, o queda con el tamaño de la ventana anterior
+  if (filterTitle) {
+    window.addEventListener('resize', () => ajustarTituloFiltro(filterTitle), {
+      signal: abort!.signal,
     });
-    // Disabled by default
-    gridDraggable[0].disable();
+  }
+
+  /** el alto de .works cambia de golpe al entrar o salir del filtro: sin
+   *  recolocar el scroll, lo que hay debajo (Techniques, contacto, pie)
+   *  pega un salto y se pierde el lugar en la página */
+  function irACatalogo() {
+    const el = document.getElementById('catalogo');
+    if (!el) return;
+    if (lenis) lenis.scrollTo(el, { offset: -20, duration: 0.6 });
+    else el.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' });
   }
 
   links.forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       const filter = link.dataset.filter;
-      
-      // Update active state
+
       links.forEach(l => l.classList.remove('is-active'));
       link.classList.add('is-active');
 
-      // Update Island text
       const logoText = document.querySelector('.island-logo');
       if (logoText) {
-        logoText.textContent = filter === 'all' ? 'FILTRAR' : filter!.toUpperCase();
+        const idioma = idiomaActual();
+        logoText.textContent =
+          filter === 'all'
+            ? t('filtro.etiqueta', idioma)
+            : CATEGORIAS[filter as Categoria][idioma].toUpperCase();
       }
 
-      // Filter tiles
-      if (filter === 'all') {
-        // Resume infinite marquee
-        if (rowsTick) gsap.ticker.add(rowsTick);
-        
-        // Reset Draggable position and disable it
-        if (gridDraggable) {
-          gsap.set(rows, { x: 0, y: 0 });
-          gridDraggable[0].disable();
-        }
+      if (works) {
+        const yaFiltrado = works.classList.contains('is-filtered');
 
-        // Show all tiles with animation
-        gsap.to(tiles, {
-          opacity: 1, 
-          duration: 0.4, 
-          ease: 'power2.out',
-          onStart: () => {
-            tiles.forEach(t => {
-              t.style.display = '';
-              t.style.pointerEvents = 'auto';
-            });
+        if (filter === 'all') {
+          if (yaFiltrado) {
+            works.classList.remove('is-filtered');
+            works.style.height = '';
+            if (rowsTick) gsap.ticker.add(rowsTick);
+            // vuelve el riel del hero: el título de categoría sobra, y su
+            // ciclo de color seguiría corriendo sobre un elemento oculto
+            filterTitleTl?.kill();
+            filterTitleTl = null;
+            if (filterTitle) {
+              filterTitle.textContent = '';
+              filterTitle.removeAttribute('aria-label');
+            }
+            // measure() recalcula el alto real del carrusel y refresca el
+            // ScrollTrigger del zoom, desactualizado mientras estuvo filtrado
+            window.dispatchEvent(new Event('resize'));
+            irACatalogo();
           }
-        });
-      } else {
-        // Pause infinite marquee
-        if (rowsTick) gsap.ticker.remove(rowsTick);
-        
-        // Enable Draggable
-        if (gridDraggable) {
-          gridDraggable[0].enable();
-        }
+        } else {
+          if (!yaFiltrado) {
+            works.classList.add('is-filtered');
+            works.style.height = 'auto';
+            if (rowsTick) gsap.ticker.remove(rowsTick);
+            window.dispatchEvent(new Event('resize'));
+            irACatalogo();
+          }
 
-        tiles.forEach(tile => {
-          const cat = tile.querySelector('.tile__cat')?.textContent?.replace('../', '');
-          const isCopy = tile.hasAttribute('data-copy');
-          const isMatch = cat === filter && !isCopy; // Only show originals that match
-          
-          if (isMatch) {
-            tile.style.display = '';
-            tile.style.pointerEvents = 'auto';
-            gsap.to(tile, { opacity: 1, duration: 0.4, ease: 'power2.out' });
+          // después de encender is-filtered: hasta acá el título sigue en
+          // display:none y mediría cero ancho, así que no sabría cuánto
+          // achicarse. Fuera del `if`: saltar de una categoría a otra no
+          // vuelve a entrar al filtro, pero sí tiene que cambiar el título
+          if (filterTitle) {
+            pintarTituloFiltro(filterTitle, CATEGORIAS[filter as Categoria][idiomaActual()]);
+          }
+
+          const visibles: HTMLElement[] = [];
+          gridTiles.forEach(tile => {
+            // por data-categoria y no por el texto: la etiqueta se traduce
+            // ("effects" / "efectos") y compararla contra el slug fallaría
+            const cat = tile.querySelector<HTMLElement>('.tile__cat')?.dataset.categoria;
+            if (cat === filter) {
+              tile.style.display = '';
+              visibles.push(tile);
+            } else {
+              tile.style.display = 'none';
+            }
+          });
+
+          if (reduced()) {
+            gsap.set(visibles, { clearProps: 'opacity,transform' });
           } else {
-            // Immediately hide non-matching and copies so the layout updates
-            tile.style.display = 'none';
-            tile.style.pointerEvents = 'none';
-            gsap.set(tile, { opacity: 0 });
+            gsap.fromTo(
+              visibles,
+              { opacity: 0, y: 16 },
+              { opacity: 1, y: 0, duration: 0.5, stagger: 0.035, ease: 'power2.out', overwrite: true },
+            );
           }
-        });
-
-        // Optional: center the draggable grid after filtering
-        if (rows) {
-          gsap.to(rows, { x: 0, y: 0, duration: 0.4, ease: 'power2.out' });
         }
       }
 

@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
+import { CATEGORIAS, IDIOMA_BASE, altCaptura, t } from '../../i18n';
 
 export async function getStaticPaths() {
   const libs = (await getCollection('librerias')).sort((a, b) => a.data.orden - b.data.orden);
@@ -17,10 +18,22 @@ export async function getStaticPaths() {
 }
 
 const { lib, anterior, siguiente } = Astro.props;
-const { nombre, claim, descripcion, url, npm, stack, categoria, imagen } = lib.data;
+const { nombre, claim, descripcion, url, npm, categoria, imagen, tips = [] } = lib.data;
+
+/* claim y descripcion vienen del frontmatter como { en, es }: el HTML se pinta
+   en el idioma base y el script cambia al otro con los data-en/data-es */
+const L = IDIOMA_BASE;
+const etiqueta = CATEGORIAS[categoria];
+
+/* los tips a medio escribir no se publican: el bloque solo aparece cuando hay
+   texto de verdad en los dos idiomas */
+const tipsListos = tips.filter((tip) => tip.en.trim() !== '' && tip.es.trim() !== '');
 ---
 
-<Base title={`${nombre} — VivifyUX`} description={claim} chrome={false}>
+<Base
+  title={{ en: `${nombre} — VivifyUX`, es: `${nombre} — VivifyUX` }}
+  description={claim}
+  chrome={false}>
   <article class="project">
     <div class="project__media">
       {/* la imagen va recortada a pantalla completa (object-fit: cover) sobre una
@@ -30,11 +43,14 @@ const { nombre, claim, descripcion, url, npm, stack, categoria, imagen } = lib.d
           la caja: con 55vw bajaba la variante de 1200 y se veía pixelada */}
       <Image
         src={imagen}
-        alt={`Captura del sitio de ${nombre}`}
+        alt={altCaptura(nombre, L)}
         widths={[900, 1400, 1860]}
         sizes="(max-width: 900px) 190vw, 105vw"
         quality={90}
         transition:name={`cover-${lib.slug}`}
+        data-i18n-attr="alt"
+        data-en={altCaptura(nombre, 'en')}
+        data-es={altCaptura(nombre, 'es')}
       />
     </div>
 
@@ -42,7 +58,9 @@ const { nombre, claim, descripcion, url, npm, stack, categoria, imagen } = lib.d
       <a
         class="project__close"
         href="/"
-        aria-label="Cerrar y volver al catálogo"
+        data-i18n="ficha.cerrar"
+        data-i18n-attr="aria-label"
+        aria-label={t('ficha.cerrar', L)}
         data-cuelume-press="release">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <path d="M1 1l14 14M15 1L1 15" stroke="currentColor" stroke-width="1.6"></path>
@@ -51,16 +69,37 @@ const { nombre, claim, descripcion, url, npm, stack, categoria, imagen } = lib.d
 
       <h1 class="project__title">{nombre}</h1>
 
-      <p class="project__claim">{claim}</p>
-      <p class="project__desc">{descripcion}</p>
+      <p class="project__claim" data-en={claim.en} data-es={claim.es}>{claim[L]}</p>
+      <p class="project__desc" data-en={descripcion.en} data-es={descripcion.es}>
+        {descripcion[L]}
+      </p>
 
       <div>
-        <p class="meta" style="opacity:0.55;margin-bottom:12px;">TECNOLOGÍAS UTILIZADAS</p>
+        <p class="meta" style="opacity:0.55;margin-bottom:12px;" data-i18n="ficha.categoria">
+          {t('ficha.categoria', L)}
+        </p>
         <div class="chips">
-          {stack.map((t) => <span class="chip">{t}</span>)}
-          <span class="chip">{categoria}</span>
+          <span class="chip" data-en={etiqueta.en} data-es={etiqueta.es}>{etiqueta[L]}</span>
         </div>
       </div>
+
+      {
+        tipsListos.length > 0 && (
+          <>
+            <div class="project__rule" />
+            <div>
+              <p class="meta" style="opacity:0.55;margin-bottom:12px;" data-i18n="ficha.tips">
+                {t('ficha.tips', L)}
+              </p>
+              <ul class="project__tips copy">
+                {tipsListos.map((tip) => (
+                  <li data-en={tip.en} data-es={tip.es}>{tip[L]}</li>
+                ))}
+              </ul>
+            </div>
+          </>
+        )
+      }
 
       <div class="project__rule"></div>
 
@@ -69,7 +108,7 @@ const { nombre, claim, descripcion, url, npm, stack, categoria, imagen } = lib.d
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M6 2H2v12h12v-4M10 2h4v4M14 2L7 9" stroke="currentColor" stroke-width="1.6"></path>
           </svg>
-          VER SITIO
+          <span data-i18n="ficha.visitar">{t('ficha.visitar', L)}</span>
         </a>
         {npm && <code class="meta" style="opacity:0.6;">NPM I {npm.toUpperCase()}</code>}
       </div>
@@ -78,11 +117,15 @@ const { nombre, claim, descripcion, url, npm, stack, categoria, imagen } = lib.d
 
       <nav class="project__nav">
         <a class="side" href={`/libreria/${anterior.slug}/`} data-cuelume-press="loading">
-          <span class="meta" style="opacity:0.55;">ANTERIOR</span>
+          <span class="meta" style="opacity:0.55;" data-i18n="ficha.anterior">
+            {t('ficha.anterior', L)}
+          </span>
           <span class="name">← {anterior.data.nombre}</span>
         </a>
         <a class="side next" href={`/libreria/${siguiente.slug}/`} data-cuelume-press="loading">
-          <span class="meta" style="opacity:0.55;">SIGUIENTE</span>
+          <span class="meta" style="opacity:0.55;" data-i18n="ficha.siguiente">
+            {t('ficha.siguiente', L)}
+          </span>
           <span class="name">{siguiente.data.nombre} →</span>
         </a>
       </nav>

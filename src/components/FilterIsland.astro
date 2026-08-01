@@ -1,18 +1,30 @@
 ---
+import { CATEGORIAS, IDIOMA_BASE, t, type Categoria } from '../i18n';
+
 interface Props {
-  categorias: { nombre: string; total: number }[];
+  categorias: { nombre: Categoria; total: number }[];
   total: number;
 }
 
 const { categorias, total } = Astro.props;
+const L = IDIOMA_BASE;
 ---
 
 <div class="island-container">
   <div class="island">
     <div class="island-logo--cont">
-      <span class="island-logo meta">FILTRAR</span>
+      {/* con un filtro puesto site.ts le escribe encima el nombre de la
+          categoría, así que no lleva data-i18n: lo repinta él */}
+      <span class="island-logo meta">{t('filtro.etiqueta', L)}</span>
     </div>
-    <button class="menu-btn" id="menuToggle" aria-expanded="false" aria-controls="menu-overlay" aria-label="Abrir menú de filtros">
+    <button
+      class="menu-btn"
+      id="menuToggle"
+      aria-expanded="false"
+      aria-controls="menu-overlay"
+      data-i18n="filtro.abrir"
+      data-i18n-attr="aria-label"
+      aria-label={t('filtro.abrir', L)}>
       <div class="button-cont">
         <svg id="menuIcon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
           <line class="bar bar-top" x1="2" y1="5" x2="14" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
@@ -23,17 +35,27 @@ const { categorias, total } = Astro.props;
     </button>
   </div>
 
-  <div class="menu-overlay" id="menu-overlay" role="dialog" aria-modal="true" aria-label="Menú de filtros">
+  <div
+    class="menu-overlay"
+    id="menu-overlay"
+    role="dialog"
+    aria-modal="true"
+    data-i18n="filtro.dialogo"
+    data-i18n-attr="aria-label"
+    aria-label={t('filtro.dialogo', L)}>
     <div class="menu-backdrop"></div>
     <div class="menu-panel">
       <nav>
         <button class="menu-link" data-filter="all" tabindex="-1">
-          <span>Todo</span>
+          <span data-i18n="filtro.todas">{t('filtro.todas', L)}</span>
           <span class="link-num">{total.toString().padStart(2, '0')}</span>
         </button>
         {categorias.map((cat) => (
           <button class="menu-link" data-filter={cat.nombre} tabindex="-1">
-            <span style="text-transform: capitalize;">{cat.nombre}</span>
+            <span
+              style="text-transform: capitalize;"
+              data-en={CATEGORIAS[cat.nombre].en}
+              data-es={CATEGORIAS[cat.nombre].es}>{CATEGORIAS[cat.nombre][L]}</span>
             <span class="link-num">{cat.total.toString().padStart(2, '0')}</span>
           </button>
         ))}

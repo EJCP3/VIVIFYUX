@@ -1,31 +1,34 @@
 ---
 import { ViewTransitions } from 'astro:transitions';
 import '../styles/global.css';
+import { IDIOMA_BASE, TEXTOS, t } from '../i18n';
 
 interface Props {
-  title?: string;
-  description?: string;
+  /** título ya traducido: { en, es }. Si falta, se usa el del sitio */
+  title?: { en: string; es: string };
+  description?: { en: string; es: string };
   /** el header/footer del sitio; la ficha de librería va a pantalla completa sin ellos */
   chrome?: boolean;
 }
 
 const {
-  title = 'VivifyUX — Directorio de librerías web interactivas',
-  description =
-    'Directorio curado de librerías de interacción para la web: scroll, texto, transiciones, efectos, sonido y motores de animación.',
+  title = TEXTOS['sitio.titulo'],
+  description = TEXTOS['sitio.descripcion'],
   chrome = true,
 } = Astro.props;
 
 const anio = new Date().getFullYear();
+const L = IDIOMA_BASE;
 ---
 
 <!doctype html>
-<html lang="es">
+<html lang={L}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
+    {/* los dos idiomas viajan en el propio <title>: el script cambia document.title sin pedir nada al servidor */}
+    <title data-titulo-en={title.en} data-titulo-es={title.es}>{title[L]}</title>
+    <meta name="description" content={description[L]} data-i18n-attr="content" data-en={description.en} data-es={description.es} />
     <link rel="preconnect" href="https://api.fontshare.com" />
     <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
     <link
@@ -44,12 +47,21 @@ const anio = new Date().getFullYear();
           <a class="brand meta" href="/">
             VIVIFYUX
           </a>
-         
+
           <div class="header-right meta">
-              <p class="header-claim meta">
-                Directorio de librerías 
-                <br />
-                web interactivas              </p>
+            <p class="header-claim meta" data-i18n="header.claim">
+              {t('header.claim', L)}
+            </p>
+
+            {/* el idioma se elige, no se rota: los dos siempre a la vista */}
+            <div class="lang" role="group" aria-label="Idioma / Language">
+              <button class="lang__op" type="button" data-idioma-opcion="en">
+                EN
+              </button>
+              <button class="lang__op" type="button" data-idioma-opcion="es">
+                ES
+              </button>
+            </div>
           </div>
         </header>
       )
@@ -65,22 +77,26 @@ const anio = new Date().getFullYear();
           <footer class="site-footer">
             {/* firma: la marca a un lado, la promesa al otro, cerrando el ancho */}
             <div class="site-footer__sign">
-              <a class="site-footer__mark display" href="/" aria-label="VivifyUX, volver al inicio">
+              <a
+                class="site-footer__mark display"
+                href="/"
+                data-i18n="footer.inicio"
+                data-i18n-attr="aria-label"
+                aria-label={t('footer.inicio', L)}>
                 {'VIVIFYUX'.split('').map((letra) => (
                   <span aria-hidden="true">{letra}</span>
                 ))}
               </a>
-              <p class="site-footer__claim meta">
-                Tu amor hacia la web
-                <br />
-                en un instante.
+              <p class="site-footer__claim meta" data-i18n="footer.claim">
+                {t('footer.claim', L)}
               </p>
             </div>
 
             <div class="site-footer__bar meta">
               <span>© {anio} VivifyUX</span>
               <a class="site-footer__top" href="#catalogo">
-                Volver arriba <span aria-hidden="true">↑</span>
+                <span data-i18n="footer.arriba">{t('footer.arriba', L)}</span>{' '}
+                <span aria-hidden="true">↑</span>
               </a>
             </div>
           </footer>
@@ -90,9 +106,18 @@ const anio = new Date().getFullYear();
 
     <script>
       import { initSite } from '../scripts/site';
+      import { iniciarIdioma, alCambiarIdioma } from '../scripts/idioma';
 
-      // con ViewTransitions, astro:page-load también dispara en la carga inicial
-      document.addEventListener('astro:page-load', initSite);
+      // el idioma va primero: el riel del hero mide el ancho de cada palabra al
+      // montarse, y si lo hace sobre el texto equivocado el bucle queda torcido
+      document.addEventListener('astro:page-load', () => {
+        iniciarIdioma();
+        initSite();
+      });
+
+      // cambiar de idioma cambia el ancho de todo lo que está medido (el riel,
+      // el título del filtro): se vuelve a montar en vez de parchear cada cosa
+      alCambiarIdioma(() => initSite());
     </script>
   </body>
 </html>

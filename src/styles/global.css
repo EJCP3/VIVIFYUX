@@ -188,8 +188,53 @@ button {
   gap: 2px;
 }
 
+/* el salto de línea viaja como \n dentro del texto (ver i18n.ts): así la
+   frase entera cabe en un atributo y cambiar de idioma es un textContent */
 .header-claim {
   max-width: 32ch;
+  white-space: pre-line;
+}
+
+/* ---------- selector de idioma ----------
+   Las dos opciones siempre a la vista: un botón que rota entre banderas o
+   siglas obliga a adivinar a qué idioma se va a saltar. El header entero es
+   pointer-events:none, hay que devolvérselo a los botones */
+.lang {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  pointer-events: auto;
+}
+
+.lang__op {
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: uppercase;
+  opacity: 0.4;
+  transition: opacity 160ms ease;
+}
+
+.lang__op:hover {
+  opacity: 0.75;
+}
+
+.lang__op:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 3px;
+}
+
+/* el idioma puesto no se puede volver a elegir: se marca y deja de responder */
+:root[data-idioma='en'] .lang__op[data-idioma-opcion='en'],
+:root[data-idioma='es'] .lang__op[data-idioma-opcion='es'] {
+  opacity: 1;
+  cursor: default;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 /* ---------- capítulo de trabajos (el zoom-out) ---------- */
@@ -218,13 +263,18 @@ button {
   transform: translate(-50%, -50%);
 }
 
+/* el riel del título vive fuera de .works__scaler: no tiene el zoom del
+   scroll encima, es un bloque de tamaño fijo que se ve siempre igual, arriba
+   del carrusel (o de la grilla del filtro). Los números son los mismos de
+   siempre multiplicados por --zoom0 (0.45): así se ve pixel a pixel como se
+   veía antes en el reposo inicial, que es el único estado que existía */
 .scrolling-text {
   overflow: hidden;
   width: 100%;
-  height: 35.5vw;
+  height: 16vw;
   position: relative;
   background-color: transparent;
-  margin-bottom: 2vw; /* Tight spacing like the image */
+  margin-bottom: 0.9vw;
 }
 
 .scrolling-text .rail {
@@ -237,11 +287,11 @@ button {
 .scrolling-text .rail h4 {
   white-space: nowrap;
   font-family: var(--font-display);
-  font-size: 32vw;
+  font-size: 14.4vw;
   font-weight: 400;
   letter-spacing: 0em;
   line-height: 1.1;
-  margin: 0 40px 0 0;
+  margin: 0 18px 0 0;
   color: var(--ink);
   text-transform: uppercase;
   position: relative; /* needed for the ::before/::after absolute positioning */
@@ -450,15 +500,15 @@ button {
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 .flair-star {
-  top: -25%; 
+  top: -25%;
   right: 15%;
-  width: 3vw; /* Tiny star */
+  width: 1.35vw;
   color: #ff98a2;
 }
 .flair-circle {
-  top: -10%; 
+  top: -10%;
   left: 20%;
-  width: 2vw; /* Tiny circle */
+  width: 0.9vw;
   color: #7b61ff;
 }
 
@@ -540,6 +590,87 @@ h4[class*="glitch"] .flair-circle {
   text-transform: uppercase;
   white-space: nowrap;
   opacity: 0.55;
+}
+
+/* ---------- grilla del filtro ----------
+   Vive fuera de .works__scaler a propósito: no tiene el zoom del scroll
+   encima, es contenido normal que se recorre con el scroll de la página.
+   Oculta por defecto; site.ts la muestra en vez del carrusel apenas hay una
+   categoría activa. El título (.scrolling-text) es hermano de .works__stage,
+   así que hay que apagarlo aparte: con un filtro puesto ese lugar queda
+   libre para lo que se ponga ahí después. */
+
+.filtered-grid {
+  display: none;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(14px, 1.6vw, 28px);
+  max-width: 1400px;
+  margin: 0 auto;
+  /* el respiro de arriba lo pone .filter-title, que va justo encima */
+  padding: clamp(20px, 3vh, 40px) var(--pad) clamp(48px, 6vh, 88px);
+
+  
+}
+
+/* el título de la categoría activa hereda el tipo y el cuerpo del riel del
+   hero, pero quieto: es una palabra sola, no una marquesina. Lo único que se
+   mueve en él es el color, que recorre las letras en cascada */
+.filter-title {
+    display: none;
+    text-align: center; /* 👈 Centra el texto directamente */
+  padding: clamp(88px, 12vh, 150px) var(--pad) 0;
+  font-family: var(--font-display);
+  font-size: 14.4vw;
+  font-weight: 400;
+  letter-spacing: 0em;
+  line-height: 1.1;
+  color: var(--ink);
+  text-transform: uppercase;
+  white-space: nowrap;
+  
+}
+
+/* cada letra va en su propio span para poder colorearlas una a una */
+.filter-title span {
+  display: inline-block;
+}
+
+.works.is-filtered .filter-title {
+  display: block;
+}
+
+.works.is-filtered .works__stage,
+.works.is-filtered .scrolling-text {
+  display: none;
+}
+
+.works.is-filtered .filtered-grid {
+  display: grid;
+}
+
+/* las tarjetas del carrusel se maquetan para vivir escaladas (ancho en vw,
+   pie dividido por --zoom0); acá se resetean a una celda de grilla normal */
+.filtered-grid .tile {
+  width: 100%;
+  flex: initial;
+}
+
+.filtered-grid .tile__media {
+  height: auto;
+  aspect-ratio: 16 / 10;
+}
+
+.filtered-grid .tile__meta {
+  gap: 10px;
+  padding-top: 10px;
+}
+
+.filtered-grid .tile__name {
+  font-size: 14px;
+}
+
+.filtered-grid .tile__cat {
+  font-size: 12px;
 }
 
 /* ---------- secciones de contenido ---------- */
@@ -682,6 +813,7 @@ h4[class*="glitch"] .flair-circle {
 
 .contact__display {
   font-size: clamp(38px, 5.4vw, 92px);
+  white-space: pre-line;
 }
 
 .contact__aside {
@@ -775,6 +907,7 @@ h4[class*="glitch"] .flair-circle {
   padding-bottom: 0.7em;
   text-align: right;
   opacity: 0.5;
+  white-space: pre-line;
 }
 
 .site-footer__top {
@@ -896,6 +1029,37 @@ h4[class*="glitch"] .flair-circle {
   background: #dededa;
 }
 
+/* los dos apuntes de la ficha. Viñeta propia en vez de list-style: el disco
+   del navegador se descuelga del texto cuando el tip ocupa dos líneas */
+.project__tips {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-width: 46ch;
+  font-size: clamp(13px, 1vw, 15px);
+  line-height: 1.5;
+}
+
+.project__tips li {
+  position: relative;
+  padding-left: 18px;
+}
+
+.project__tips li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  /* a la altura de la primera línea, no del centro del bloque */
+  top: 0.62em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ink);
+  opacity: 0.45;
+}
+
 .project__nav {
   display: flex;
   justify-content: space-between;
@@ -929,6 +1093,10 @@ h4[class*="glitch"] .flair-circle {
   :root {
     --tile-w: 92vw;
     --tile-h: 57.5vw;
+  }
+
+  .filtered-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .header-claim {
@@ -966,10 +1134,6 @@ h4[class*="glitch"] .flair-circle {
     height: 58svh;
   }
 
-  .wordmark {
-    --wm-fs: calc(40vw / var(--zoom0));
-  }
-
   /* el pie es fixed: en pantallas bajas tiene que caber sin tapar la página */
   .contact {
     grid-template-columns: 1fr;
@@ -987,6 +1151,83 @@ h4[class*="glitch"] .flair-circle {
 
   .site-footer__claim {
     display: none;
+  }
+}
+
+/* ---------- teléfonos ----------
+   En una pantalla angosta y alta el bloque del catálogo (título + una fila de
+   16:10) mide poco de alto: con las medidas de escritorio quedaban dos tercios
+   de blanco arriba. Acá la grilla se maqueta más grande y el zoom llega a 1,
+   así la fila final ocupa casi todo el ancho. El encuadre inicial lo centra el
+   JS (`measure()`), en vez de pegarlo al borde de abajo. */
+
+@media (max-width: 700px) {
+  :root {
+    --zoom0: 0.62;
+    --zoom1: 1;
+    --tile-w: 84vw;
+    --tile-h: 52.5vw; /* 16:10 */
+  }
+
+  /* mismos números de siempre multiplicados por el --zoom0 de teléfono
+     (0.62): el título se ve igual que se veía en reposo, fijo */
+  .scrolling-text {
+    height: 29.76vw;
+    margin-bottom: 1.86vw;
+  }
+
+  .scrolling-text .rail h4 {
+    font-size: 27.28vw;
+    margin-right: 16px;
+  }
+
+  /* el mismo cuerpo que el riel. Las palabras que no entren a este tamaño las
+     achica site.ts, que es el único que sabe cuánto mide cada una */
+  .filter-title {
+    font-size: 27.28vw;
+    padding-top: clamp(70px, 20vw, 100px);
+  }
+
+  .flair-star {
+    width: 4.34vw;
+  }
+
+  .flair-circle {
+    width: 3.1vw;
+  }
+
+  /* el pie de la tarjeta se fija en px: al final del zoom (escala 1) se lee a
+     su tamaño real, y las divisiones por --zoom0 lo dejaban enorme */
+  .tile__meta {
+    gap: 10px;
+    padding-top: 8px;
+  }
+
+  .tile__name {
+    font-size: 15px;
+  }
+
+  .tile__cat {
+    font-size: 13px;
+  }
+
+  .filtered-grid {
+    grid-template-columns: 1fr;
+    padding-top: clamp(70px, 20vw, 100px);
+  }
+
+  .section {
+    padding-top: clamp(48px, 12vw, 80px);
+  }
+
+  .contact {
+    padding-bottom: clamp(28px, 7vw, 40px);
+  }
+
+  /* en una sola columna el título arranca a la altura del botón de cerrar:
+     un nombre largo se le metía debajo */
+  .project__title {
+    margin-top: 52px;
   }
 }
 

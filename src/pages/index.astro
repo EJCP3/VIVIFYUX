@@ -3,7 +3,9 @@ import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
 import Tile from "../components/Tile.astro";
 import FilterIsland from "../components/FilterIsland.astro";
+import { CATEGORIAS, IDIOMA_BASE, PALABRAS_HERO, t } from "../i18n";
 
+const L = IDIOMA_BASE;
 
 const libs = (await getCollection("librerias")).sort(
   (a, b) => a.data.orden - b.data.orden,
@@ -16,31 +18,11 @@ const libs = (await getCollection("librerias")).sort(
 const FILAS = 2;
 const COPIAS = 3;
 
-/* --- el título gigante rota entre la marca, palabras sueltas y frases cortas.
-   El JS le baja el tamaño a cada una para que entre en el ancho de pantalla,
-   así que una frase larga se ve más chica que una palabra. La marca vuelve
-   cada seis entradas: funciona como estribillo. Separador "|" porque algunas
-   frases llevan coma --- */
-const PALABRAS = [
-  "VIVIFYUX",
-  "INTERACCIÓN",
-  "FLUIDEZ",
-  "ANIMACIÓN",
-  "VIVIFYUX",
-  "EXPERIENCIA",
-  "CREATIVIDAD",
-  "DINAMISMO",
-  "VIVIFYUX",
-  "MOTION",
-  "DISEÑO",
-  "IMPACTO",
-  "INTERACTIVOS",
-  "VISUAL",
-  "ANIMACIÓN",
-  "VIVIFYUX",
-  "VIBRANTE"
-
-];
+/* --- el título gigante rota entre la marca y palabras sueltas; la marca
+   vuelve cada seis entradas y funciona como estribillo. La lista vive en
+   i18n.ts porque cada palabra tiene su par en español --- */
+const MARCA = { en: "VIVIFYUX", es: "VIVIFYUX" };
+const RIEL = [MARCA, ...PALABRAS_HERO, MARCA, ...PALABRAS_HERO];
 
 /* --- leyes de lawsofux.com/es, cada una atada a algo que este sitio hace --- */
 
@@ -54,11 +36,13 @@ const filas = Array.from({ length: FILAS }, (_, i) => {
 /* --- datos reales derivados del catálogo --- */
 const categorias = [
   "scroll",
-  "texto",
-  "transiciones",
-  "efectos",
-  "sonido",
-  "motor",
+  "text",
+  "transitions",
+  "effects",
+  "sound",
+  "engine",
+  "components",
+  "generators",
 ] as const;
 const porCategoria = categorias.map((c) => ({
   nombre: c,
@@ -72,35 +56,43 @@ const porCategoria = categorias.map((c) => ({
 
   <!-- ===== capítulo de trabajos: el zoom-out de la grilla ===== -->
   <section class="works" id="catalogo">
+    <!-- ===== HERO MARQUEE (INCAMANA STYLE) =====
+         Hermano de .works__stage, no hijo: no lleva el zoom del scroll
+         encima. Tamaño fijo siempre, corre igual haya o no un filtro puesto -->
+    <div class="scrolling-text">
+      <div class="rail">
+        {RIEL.map((palabra) => (
+          /* las dos versiones viajan en data-palabra-*: el h4 no puede usar el
+             data-en/data-es genérico porque su textContent se llevaría puesto
+             el .flair y los spans por letra. Lo reescribe site.ts */
+          <h4
+            data-text={palabra[L]}
+            data-palabra-en={palabra.en}
+            data-palabra-es={palabra.es}
+            data-cuelume-press="tick">
+            <div class="flair">
+              <svg class="flair-star" viewBox="0 0 100 100">
+                <g fill="currentColor">
+                  <rect x="42" y="0" width="16" height="100" rx="8" />
+                  <rect x="0" y="42" width="100" height="16" rx="8" />
+                  <rect x="42" y="0" width="16" height="100" rx="8" transform="rotate(45 50 50)" />
+                  <rect x="42" y="0" width="16" height="100" rx="8" transform="rotate(-45 50 50)" />
+                </g>
+              </svg>
+              <svg class="flair-circle" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="35" stroke="currentColor" stroke-width="20" fill="none" />
+              </svg>
+            </div>
+            {palabra[L].split('').map((letra) => (
+              <span>{letra}</span>
+            ))}
+          </h4>
+        ))}
+      </div>
+    </div>
+
     <div class="works__stage">
       <div class="works__scaler">
-        
-        <!-- ===== HERO MARQUEE (INCAMANA STYLE) ===== -->
-        <div class="scrolling-text">
-          <div class="rail">
-            {['VIVIFYUX', ...PALABRAS, 'VIVIFYUX', ...PALABRAS].map((palabra) => (
-              <h4 data-text={palabra.toUpperCase()} data-cuelume-press="tick">
-                <div class="flair">
-                  <svg class="flair-star" viewBox="0 0 100 100">
-                    <g fill="currentColor">
-                      <rect x="42" y="0" width="16" height="100" rx="8" />
-                      <rect x="0" y="42" width="100" height="16" rx="8" />
-                      <rect x="42" y="0" width="16" height="100" rx="8" transform="rotate(45 50 50)" />
-                      <rect x="42" y="0" width="16" height="100" rx="8" transform="rotate(-45 50 50)" />
-                    </g>
-                  </svg>
-                  <svg class="flair-circle" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="35" stroke="currentColor" stroke-width="20" fill="none" />
-                  </svg>
-                </div>
-                {palabra.toUpperCase().split('').map((letra) => (
-                  <span>{letra}</span>
-                ))}
-              </h4>
-            ))}
-          </div>
-        </div>
-
         <div class="rows">
           {
             filas.map((fila) => (
@@ -122,6 +114,26 @@ const porCategoria = categorias.map((c) => ({
         </div>
       </div>
     </div>
+
+    <!-- ===== título de la categoría activa: ocupa el sitio que deja el riel
+         del hero cuando hay un filtro puesto. Lo escribe site.ts ===== -->
+    <h2 class="filter-title" aria-live="polite"></h2>
+
+    <!-- ===== grilla del filtro: una tarjeta por librería, sin copias ni
+         escala de scroll. Oculta por defecto; site.ts la muestra en vez del
+         carrusel apenas hay una categoría activa ===== -->
+    <div class="filtered-grid">
+      {
+        libs.map((lib) => (
+          <Tile
+            slug={lib.slug}
+            nombre={lib.data.nombre}
+            categoria={lib.data.categoria}
+            imagen={lib.data.imagen}
+          />
+        ))
+      }
+    </div>
   </section>
 
 
@@ -130,13 +142,17 @@ const porCategoria = categorias.map((c) => ({
   <!-- ===== técnicas / categorías ===== -->
   <section class="section">
     <div class="section__inner">
-      <h2 class="display section__title" data-reveal>Técnicas</h2>
+      <h2 class="display section__title" data-i18n="tecnicas.titulo" data-reveal>
+        {t('tecnicas.titulo', L)}
+      </h2>
       <div>
         <ul class="list" data-reveal data-reveal-children>
           {
             porCategoria.map((c) => (
               <li class="list__row meta">
-                <span>{c.nombre}</span>
+                <span data-en={CATEGORIAS[c.nombre].en} data-es={CATEGORIAS[c.nombre].es}>
+                  {CATEGORIAS[c.nombre][L]}
+                </span>
                 <span class="num">x{c.total}</span>
               </li>
             ))
@@ -150,17 +166,19 @@ const porCategoria = categorias.map((c) => ({
 
   <!-- ===== contacto: cierra el contenido, justo encima del pie ===== -->
   <section class="contact">
-    <h2 class="display contact__display">¿Falta<br />alguna?</h2>
+    <h2 class="display contact__display" data-i18n="contacto.titulo">
+      {t('contacto.titulo', L)}
+    </h2>
     <div class="contact__aside">
-      <p class="copy contact__copy">
-        El catálogo crece con lo que propone quien lo usa. Si conoces una
-        librería que merece estar acá, cuéntala en un issue y la revisamos.
+      <p class="copy contact__copy" data-i18n="contacto.copy">
+        {t('contacto.copy', L)}
       </p>
       <a
         class="pill meta"
         href="https://github.com/vivifyux/vivifyux.github.io/issues/new"
         target="_blank"
-        rel="noopener">Proponer una librería ↗</a>
+        rel="noopener"
+        data-i18n="contacto.cta">{t('contacto.cta', L)}</a>
     </div>
   </section>
 </Base>
