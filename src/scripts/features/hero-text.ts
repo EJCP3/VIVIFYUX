@@ -3,6 +3,7 @@ import { Observer } from 'gsap/Observer';
 import { globalState } from '../state';
 import { horizontalLoop } from '../utils/text';
 import { idiomaActual } from '../idioma';
+import { reduced } from '../utils/dom';
 
 const SIGNOS = [
   `<svg viewBox="0 0 100 100" fill="#ff8a6b" aria-hidden="true"><rect x="42" y="0" width="16" height="100" rx="8"/><rect x="0" y="42" width="100" height="16" rx="8"/><rect x="42" y="0" width="16" height="100" rx="8" transform="rotate(45 50 50)"/><rect x="42" y="0" width="16" height="100" rx="8" transform="rotate(-45 50 50)"/></svg>`,
@@ -29,7 +30,11 @@ function sincronizarPalabrasHero() {
 }
 
 export function setupSlotText() {
+  // las palabras se escriben siempre: sin motion el riel no corre, pero el
+  // título tiene que estar puesto y en el idioma que toca
   sincronizarPalabrasHero();
+  if (reduced()) return;
+
   const scrollingText = gsap.utils.toArray<HTMLElement>('.scrolling-text .rail h4');
   if (scrollingText.length === 0) return;
 

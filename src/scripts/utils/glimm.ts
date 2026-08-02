@@ -19,8 +19,18 @@ export function getGlimmCanvas(): HTMLCanvasElement {
   return canvas;
 }
 
+/** un barrido a la vez: todos comparten el mismo canvas, y montar un shader
+ *  encima del que está corriendo deja a los dos a medias (el primero en acabar
+ *  destruye el contexto del otro, y el midpoint del otro no llega nunca).
+ *
+ *  Pasa de verdad en el cambio de idioma: el barrido lo lanza idioma.ts y a
+ *  mitad remonta el sitio, que a su vez quiere barrer para estrenar el
+ *  carrusel. Si ya hay uno en marcha, el trabajo del midpoint se hace en el
+ *  acto y se aprovecha la pasada que ya está tapando la pantalla */
+let enCurso = false;
+
 export function ejecutarGlimmTransition(onMidpoint: () => void) {
-  if (reduced()) {
+  if (reduced() || enCurso) {
     onMidpoint();
     return;
   }
@@ -29,6 +39,7 @@ export function ejecutarGlimmTransition(onMidpoint: () => void) {
     const canvas = getGlimmCanvas();
     const ctrl = createShader({ canvas });
     if (ctrl) {
+      enCurso = true;
       playSweep(ctrl, {
         palette: accentChain(['#D33CFF', '#7B4FFF', '#2E70FF', '#1FC8FF']),
         waveAmount: 0.5,
@@ -38,6 +49,7 @@ export function ejecutarGlimmTransition(onMidpoint: () => void) {
           onMidpoint();
         },
         onComplete: () => {
+          enCurso = false;
           ctrl.destroy();
         },
       });
@@ -45,6 +57,7 @@ export function ejecutarGlimmTransition(onMidpoint: () => void) {
       onMidpoint();
     }
   } catch {
+    enCurso = false;
     onMidpoint();
   }
 }

@@ -195,6 +195,12 @@ const L = IDIOMA_BASE;
 .menu-link:only-child  { border-radius: 10px; }
 .menu-link:hover { color: var(--ink); background: rgba(0, 0, 0, 0.03); }
 .menu-link.is-active { color: var(--ink); font-weight: 800; background: rgba(0, 0, 0, 0.05); }
+
+/* con la luz apagada la fila no reacciona al pasar el ratón: queda el cursor de
+   mano como única señal. La marca del filtro puesto (.is-active) se queda: eso
+   no es una reacción, es el estado */
+:global(html.sin-motion) .menu-link:hover { color: var(--ink-soft); background: none; }
+:global(html.sin-motion) .menu-link.is-active:hover { color: var(--ink); background: rgba(0, 0, 0, 0.05); }
 .menu-link:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; border-radius: 10px; }
 
 .link-num {
@@ -205,6 +211,7 @@ const L = IDIOMA_BASE;
   transition: opacity .15s;
 }
 .menu-link:hover .link-num { opacity: 1; }
+:global(html.sin-motion) .menu-link:hover .link-num { opacity: 0.6; }
 
 /* ── TELÉFONOS ──
    Abierta, la isla mide 90vw: a la altura del header se le montaba encima y

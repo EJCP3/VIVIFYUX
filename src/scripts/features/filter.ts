@@ -45,6 +45,10 @@ export function pintarTituloFiltro(titulo: HTMLElement, texto: string) {
   /** el rebote del ratón: sube, se pinta y vuelve exactamente a como estaba,
    *  tanto si termina como si otra animación la pisa por el camino */
   function saltar(letra: HTMLElement) {
+    // la cascada de abajo se corta con un return, pero el rebote del ratón vive
+    // en un oyente y hay que preguntar acá, cada vez que se pasa por encima
+    if (reduced()) return;
+
     const color = COLORES_TITULO[Math.floor(Math.random() * COLORES_TITULO.length)];
     gsap.fromTo(
       letra,
@@ -72,7 +76,9 @@ export function pintarTituloFiltro(titulo: HTMLElement, texto: string) {
     span.textContent = caracter;
     span.setAttribute('aria-hidden', 'true');
     span.style.display = 'inline-block';
-    span.style.cursor = 'pointer';
+    // con la luz apagada la letra no reacciona: tampoco tiene que anunciarse
+    // como si lo hiciera
+    span.style.cursor = reduced() ? '' : 'pointer';
 
     span.addEventListener('pointerenter', () => saltar(span));
 
@@ -155,6 +161,16 @@ export function setupFilterIsland() {
 
   function initTimeline() {
     tl && tl.revert();
+
+    /* el panel y la isla pueden llegar con el transform de la línea de tiempo
+       anterior puesto. Si la nueva se construye encima, GSAP lee esa matriz
+       como punto de partida: el yPercent del recorrido ya no se puede leer como
+       porcentaje y se hornea en píxeles que no se van nunca. El panel queda
+       ~40px más arriba, o sea metido debajo de la isla, tapando su primera fila */
+    gsap.set([island, '.menu-panel', '.menu-link', '.island-logo'], {
+      clearProps: 'transform',
+    });
+
     const expandedWidth = Math.min(window.innerWidth * 0.9, 400);
 
     tl = gsap.timeline({ paused: true })
@@ -185,8 +201,18 @@ export function setupFilterIsland() {
     btn!.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open filter menu');
     document.querySelectorAll('.menu-link').forEach((l) => l.setAttribute('tabindex', isOpen ? '0' : '-1'));
 
+    // sin motion la isla no se despliega: salta al estado abierto o cerrado
     if (isOpen) {
-      tl.timeScale(1).play();
+      if (reduced()) {
+        tl.progress(1).pause();
+        /* el salto no deja rastro del punto de partida: el panel se apoya en el
+           `top` de la hoja, justo debajo de la isla, y no en lo que quedara del
+           yPercent con el que arranca el recorrido */
+        gsap.set('.menu-panel', { yPercent: 0, y: 0, scale: 1 });
+      } else tl.timeScale(1).play();
+    } else if (reduced()) {
+      tl.progress(0).pause();
+      gsap.set(overlay, { pointerEvents: 'none' });
     } else {
       tl.eventCallback('onReverseComplete', () => gsap.set(overlay, { pointerEvents: 'none' }));
       tl.timeScale(1.5).reverse();
@@ -379,6 +405,17 @@ export function setupFilterIsland() {
       // filtro sin tener que buscar una opción "ninguno" que no existe
       const apagar = link.classList.contains('is-active');
 
+      /* el menú se cierra ANTES de tocar la grilla, y el orden importa.
+
+         Con el barrido, el trabajo de abajo ocurre a mitad de la pasada, mucho
+         después de este clic; sin barrido (la luz apagada) ocurre en el acto.
+         Si el cierre fuera después, en ese caso se colaría en medio el resize
+         que dispara mostrarGrilla: el oyente da la isla por cerrada y rehace su
+         línea de tiempo, y el toggle de después la volvía a abrir sobre una
+         línea recién nacida. De ahí el menú a medio pintar y los filtros que a
+         veces no cambiaban */
+      toggle();
+
       ejecutarGlimmTransition(() => {
         if (apagar) {
           quitarFiltro();
@@ -388,8 +425,6 @@ export function setupFilterIsland() {
         link.classList.add('is-active');
         mostrarGrilla(filter, true);
       });
-
-      toggle();
     }, { signal: globalState.abort.signal });
   });
 }

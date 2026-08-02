@@ -3,6 +3,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Observer } from 'gsap/Observer';
 import { globalState } from '../state';
 import { esMovil, reduced } from '../utils/dom';
+import { ejecutarGlimmTransition } from '../utils/glimm';
 
 const BOOST_MAX = 3.5;
 
@@ -17,7 +18,12 @@ export function setupWorks() {
 
   const rows = document.querySelector<HTMLElement>('.rows');
   const row0 = rows?.firstElementChild as HTMLElement | undefined;
-  if (!rows || !row0) return;
+  // el telón lo levanta measure(); si no hay filas que medir, se levanta acá o
+  // el escenario se queda escondido para siempre
+  if (!rows || !row0) {
+    stage.classList.add('is-ready');
+    return;
+  }
 
   const hero = document.querySelector<HTMLElement>('.scrolling-text');
 
@@ -52,6 +58,30 @@ export function setupWorks() {
       ? hero.offsetHeight + (parseFloat(getComputedStyle(hero).marginBottom) || 0)
       : 0;
     const gapChico = movil ? 16 : 32;
+
+    /* sin motion no hay recorrido que contar: el zoom se queda clavado en su
+       primer fotograma, que es el encuadre pensado para que solo asome la
+       primera fila —el resto lo traía el scroll— y el sticky corta lo que
+       sobra. Así que acá se encuadra de una vez: el título arriba y las dos
+       filas enteras debajo, a la escala que haga falta para que entren.
+       Un solo encuadre, sin recorrido: scaleFrom y scaleTo valen lo mismo */
+    if (reduced()) {
+      const disponible = vh - heroH - gapChico * 2;
+      const escala = Math.max(0.05, Math.min(scaleTo, disponible / contentH));
+      scaleFrom = escala;
+      scaleTo = escala;
+
+      if (hero) hero.style.top = `${gapChico.toFixed(1)}px`;
+      shiftFrom = gapChico + heroH - vh / 2 + (contentH * escala) / 2;
+      shiftTo = shiftFrom;
+
+      if (!works!.classList.contains('is-filtered')) {
+        works!.style.height = `${Math.round(vh)}px`;
+      }
+      apply();
+      return;
+    }
+
     const filaH = (rowH + gapY) * scaleFrom;
     /* en una ventana normal el reparto deja al título muy por debajo del
        header y de la isla; el mínimo solo entra en ventanas tan bajas que el
@@ -106,7 +136,38 @@ export function setupWorks() {
     pintarHero(e);
   }
 
+  /** levanta el telón que puso la hoja (el escenario está escondido hasta que
+   *  measure() lo encuadra). Lo levanta el barrido de glimm, el mismo que ya
+   *  marca los cambios de filtro y de idioma: el carrusel aparece detrás de la
+   *  pasada, a mitad del barrido, en vez de aparecer de golpe.
+   *
+   *  Al volver de una ficha no hay estreno: ahí el carrusel llega restaurado en
+   *  el punto donde se dejó y la vuelta tiene que ser invisible.
+   *
+   *  ejecutarGlimmTransition ya se encarga de los casos sin barrido (motion
+   *  reducido, WebGL que no arranca): llama al midpoint en el acto */
+  function revelar() {
+    const levantar = () => stage!.classList.add('is-ready');
+
+    if (window._vtRestoring) {
+      levantar();
+      return;
+    }
+
+    /* seguro: el barrido corre con el reloj de fotogramas, que no avanza si la
+       pestaña arranca en segundo plano, y podría no llegar nunca a su mitad (o
+       perderse el contexto de WebGL por el camino). Sin esto el carrusel se
+       quedaría escondido para siempre. Los temporizadores sí corren en segundo
+       plano, así que el telón sube igual y como mucho se pierde el estreno */
+    const seguro = window.setTimeout(levantar, 2500);
+    ejecutarGlimmTransition(() => {
+      window.clearTimeout(seguro);
+      levantar();
+    });
+  }
+
   measure();
+  revelar();
 
   globalState.onResize = () => {
     measure();

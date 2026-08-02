@@ -27,6 +27,23 @@ const L = IDIOMA_BASE;
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {/* en línea y en el <head>: corre antes del primer pintado. Marca que hay
+        JS para que la hoja pueda esconder lo que necesita medirse antes de
+        verse (el encuadre del carrusel). Sin JS la clase no llega y no se
+        esconde nada.
+
+        Y de paso deja puesto el interruptor de animaciones del pie antes de
+        que se pinte nada: si se esperara al bundle, quien lo apagó vería
+        arrancar justo lo que apagó. La clave va escrita a mano porque un
+        script en línea no puede importar: es CLAVE_MOTION de src/i18n.ts */}
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      try {
+        if (localStorage.getItem('vivifyux:motion') === 'off') {
+          document.documentElement.classList.add('sin-motion');
+        }
+      } catch (e) {}
+    </script>
     {/* los dos idiomas viajan en el propio <title>: el script cambia document.title sin pedir nada al servidor */}
     <title data-titulo-en={title.en} data-titulo-es={title.es}>{title[L]}</title>
     <meta name="description" content={description[L]} data-i18n-attr="content" data-en={description.en} data-es={description.es} />
@@ -96,6 +113,16 @@ const L = IDIOMA_BASE;
 
             <div class="site-footer__bar meta">
               <span>© {anio} VivifyUX</span>
+              {/* el rótulo del arranque asume las animaciones encendidas; si
+                  estaban apagadas, setupMotionToggle lo corrige al montar */}
+              <button
+                class="site-footer__motion"
+                type="button"
+                data-motion-toggle
+                data-i18n="motion.apagar"
+                aria-pressed="false">
+                {t('motion.apagar', L)}
+              </button>
               <a class="site-footer__top" href="#catalogo">
                 <span data-i18n="footer.arriba">{t('footer.arriba', L)}</span>{' '}
                 <span aria-hidden="true">↑</span>

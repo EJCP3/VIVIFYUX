@@ -16,6 +16,10 @@ export const OTRO_IDIOMA: Record<Idioma, Idioma> = { en: 'es', es: 'en' };
 /** clave de localStorage donde queda la elección */
 export const CLAVE_IDIOMA = 'vivifyux:idioma';
 
+/** dónde queda el interruptor de animaciones del pie. El script del <head> lo
+ *  lee escrito a mano (no puede importar): si cambia acá, cambiarlo allá */
+export const CLAVE_MOTION = 'vivifyux:motion';
+
 export type Par = Record<Idioma, string>;
 
 /* --- textos sueltos de la interfaz. La clave se usa tal cual en data-i18n --- */
@@ -65,6 +69,11 @@ export const TEXTOS = {
   'filtro.dialogo': { en: 'Filter menu', es: 'Menú de filtros' },
 
   'idioma.cambiar': { en: 'Cambiar a español', es: 'Switch to English' },
+
+  /* el rótulo dice lo que hace el botón, no el estado en el que está: apagar la
+     luz del sitio es dejarlo quieto */
+  'motion.apagar': { en: 'Turn off the lights', es: 'Apagar la luz' },
+  'motion.encender': { en: 'Turn on the lights', es: 'Encender la luz' },
 } as const satisfies Record<string, Par>;
 
 export type ClaveTexto = keyof typeof TEXTOS;

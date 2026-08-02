@@ -256,6 +256,21 @@ button {
   overflow: hidden;
 }
 
+/* el encuadre del carrusel (la escala inicial y, sobre todo, el corrimiento
+   vertical) sale de medir el alto real de una fila y del riel: no hay forma de
+   escribirlo en la hoja. Hasta que measure() lo pone, el escenario no se pinta,
+   o se vería un fotograma con las tarjetas a tamaño completo y descolocadas.
+
+   Va colgado de .js, que pone un script en el <head> antes del primer pintado:
+   sin JS no se esconde nada, porque entonces nadie va a revelarlo */
+.js .works__stage {
+  visibility: hidden;
+}
+
+.js .works__stage.is-ready {
+  visibility: visible;
+}
+
 /* sin will-change: le pide al navegador que NO congele el rasterizado, que es
    lo que dejaba las capturas pixeladas al agrandarlas */
 .works__scaler {
@@ -264,7 +279,9 @@ button {
   left: 50%;
   width: max-content;
   transform-origin: 50% 50%;
-  transform: translate(-50%, -50%);
+  /* la escala de arranque también en la hoja: el JS la reescribe entera en
+     cuanto mide, pero así lo que hay debajo del telón ya es del tamaño bueno */
+  transform: translate(-50%, -50%) scale(var(--zoom0));
 }
 
 /* el riel del título vive dentro de .works__stage pero fuera de
@@ -935,6 +952,58 @@ h4[class*="glitch"] .flair-circle {
 .site-footer__top:hover,
 .site-footer__top:focus-visible {
   background-size: 100% 1px;
+}
+
+/* el interruptor de animaciones se lee como un enlace más de la barra del pie,
+   no como un botón de formulario */
+.site-footer__motion {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  background-image: linear-gradient(var(--ink), var(--ink));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition: background-size 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.site-footer__motion:hover,
+.site-footer__motion:focus-visible {
+  background-size: 100% 1px;
+}
+
+/* apagado: subrayado fijo y más apagado de color, para que el estado se lea sin
+   tener que interpretar el rótulo */
+.site-footer__motion[aria-pressed='true'] {
+  background-size: 100% 1px;
+  opacity: 0.55;
+}
+
+/* ---------- animaciones apagadas desde el pie ----------
+   Esto corta solo lo que anima la propia hoja. Lo que anima el JS no pasa por
+   acá: lo corta reduced(), que mira esta misma clase.
+
+   No va `animation: none` porque varias animaciones llevan `both` y dejan al
+   elemento en su estado final (el signo que sustituye una letra, por ejemplo):
+   apagándolas del todo se quedarían en el inicial. Dejándolas correr en 1ms
+   terminan igual, pero sin que se vea el recorrido */
+.sin-motion *,
+.sin-motion *::before,
+.sin-motion *::after {
+  animation-duration: 1ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 1ms !important;
+  transition-delay: 0ms !important;
+}
+
+.sin-motion {
+  scroll-behavior: auto !important;
 }
 
 /* ---------- ficha de librería (vista de proyecto) ---------- */
