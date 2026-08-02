@@ -7,8 +7,8 @@ transiciones, efectos, sonido y motores de animación. Cada ficha resume qué
 hace la librería, con qué está hecha y enlaza a su sitio y a su paquete de npm.
 El catálogo corre con las mismas librerías que cataloga.
 
-[Proponer una librería](https://github.com/EJCP3/VIVIFYUX-/issues/new) ·
-[Reportar un fallo](https://github.com/EJCP3/VIVIFYUX-/issues) ·
+[Proponer una librería](https://github.com/EJCP3/VivifyUX/issues/new) ·
+[Reportar un fallo](https://github.com/EJCP3/VivifyUX/issues) ·
 [Guía de contribución](CONTRIBUTING.es.md)
 
 ## Cómo correrlo
@@ -25,7 +25,7 @@ Cualquiera puede sumar una librería al catálogo. Antes de abrir un PR leé la
 [guía de contribución](CONTRIBUTING.es.md): explica qué campos lleva una ficha,
 cómo tiene que ser la captura y cómo probarla en local. Si no querés tocar
 código, alcanza con
-[abrir un issue](https://github.com/EJCP3/VIVIFYUX-/issues/new).
+[abrir un issue](https://github.com/EJCP3/VivifyUX/issues/new).
 
 ## Cómo está hecho
 

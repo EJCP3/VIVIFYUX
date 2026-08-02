@@ -4,8 +4,8 @@
 
 Directory of interaction libraries for the web: scroll, text, transitions, effects, sound, and animation engines. Each card summarizes what the library does, what it's made with, and links to its site and npm package. The catalog runs on the same libraries it catalogs.
 
-[Propose a library](https://github.com/EJCP3/VIVIFYUX-/issues/new) ·
-[Report a bug](https://github.com/EJCP3/VIVIFYUX-/issues) ·
+[Propose a library](https://github.com/EJCP3/VivifyUX/issues/new) ·
+[Report a bug](https://github.com/EJCP3/VivifyUX/issues) ·
 [Contributing Guide](CONTRIBUTING.md)
 
 ## How to run it
@@ -18,7 +18,7 @@ pnpm run build     # generates /dist
 
 ## Contributing
 
-Anyone can add a library to the catalog. Before opening a PR, read the [contributing guide](CONTRIBUTING.md): it explains what fields a card needs, how the screenshot should be, and how to test it locally. If you don't want to touch code, just [open an issue](https://github.com/EJCP3/VIVIFYUX-/issues/new).
+Anyone can add a library to the catalog. Before opening a PR, read the [contributing guide](CONTRIBUTING.md): it explains what fields a card needs, how the screenshot should be, and how to test it locally. If you don't want to touch code, just [open an issue](https://github.com/EJCP3/VivifyUX/issues/new).
 
 ## How it's made
 

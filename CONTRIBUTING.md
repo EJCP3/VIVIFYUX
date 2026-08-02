@@ -23,7 +23,7 @@ It doesn't need to be popular or have many stars. It just needs to be clear what
 
 ## Short way: open an issue
 
-If you don't want to touch code, [open an issue](https://github.com/EJCP3/VIVIFYUX-/issues/new) with:
+If you don't want to touch code, [open an issue](https://github.com/EJCP3/VivifyUX/issues/new) with:
 
 - Name of the library and link to its site or repository.
 - One line about what it does.
@@ -38,8 +38,8 @@ That's enough. We will prepare the card and the screenshot.
 ### 1. Prepare the project
 
 ```bash
-git clone https://github.com/EJCP3/VIVIFYUX-.git
-cd VIVIFYUX-
+git clone https://github.com/EJCP3/VivifyUX.git
+cd VivifyUX
 pnpm install
 pnpm run dev       # http://localhost:4321
 ```

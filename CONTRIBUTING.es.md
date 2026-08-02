@@ -32,7 +32,7 @@ qué hace y que alguien pueda instalarla. hasta puede ser tuya la libreria.
 ## Camino corto: abrir un issue
 
 Si no querés tocar código,
-[abrí un issue](https://github.com/EJCP3/VIVIFYUX-/issues/new) con:
+[abrí un issue](https://github.com/EJCP3/VivifyUX/issues/new) con:
 
 - Nombre de la librería y enlace a su sitio o repositorio.
 - Una línea sobre qué hace.
@@ -47,8 +47,8 @@ Con eso alcanza. Nosotros preparamos la ficha y la captura.
 ### 1. Preparar el proyecto
 
 ```bash
-git clone https://github.com/EJCP3/VIVIFYUX-.git
-cd VIVIFYUX-
+git clone https://github.com/EJCP3/VivifyUX.git
+cd VivifyUX
 npm install
 npm run dev       # http://localhost:4321
 ```
