@@ -74,22 +74,51 @@ export function setupSlotText() {
   });
 
   document.fonts.ready.then(() => {
-    globalState.heroLoopTl?.kill();
-    gsap.set(scrollingText, { clearProps: 'transform,x,xPercent,y,yPercent' });
-    const tl = horizontalLoop(scrollingText, {
-      repeat: -1,
-      paddingRight: parseFloat(getComputedStyle(scrollingText[0]).marginRight) || 0,
-      speed: 1.00,
-    });
-    globalState.heroLoopTl = tl;
+    /** el bucle se arma midiendo el ancho de cada palabra. Si el riel está
+     *  escondido —montar el sitio con un filtro puesto deja el escenario en
+     *  display:none— todo mide cero y el bucle nace sin recorrido: quieto para
+     *  siempre. Se anota si la medida valía, para poder rehacerlo cuando el
+     *  riel recupere su ancho */
+    let medidoConAncho = false;
+
+    function montarRiel() {
+      globalState.heroLoopTl?.kill();
+      gsap.set(scrollingText, { clearProps: 'transform,x,xPercent,y,yPercent' });
+      globalState.heroLoopTl = horizontalLoop(scrollingText, {
+        repeat: -1,
+        paddingRight: parseFloat(getComputedStyle(scrollingText[0]).marginRight) || 0,
+        speed: 1.00,
+      });
+      medidoConAncho = scrollingText[0].offsetWidth > 0;
+    }
+
+    montarRiel();
+
+    /* solo se rehace si la medida anterior no valía: en un resize normal el
+       bucle sigue como está, que rehacerlo lo devolvería al principio de un
+       salto. Acá llega el resize que dispara quitarFiltro, ya con el riel
+       destapado */
+    window.addEventListener(
+      'resize',
+      () => {
+        if (!medidoConAncho) montarRiel();
+      },
+      { signal },
+    );
 
     const RAFAGA = 2.2;
+    /* la ráfaga se pide a globalState y no a una variable capturada: si el riel
+       se rehizo, la línea de tiempo vieja ya está muerta */
+    let rafaga: gsap.core.Timeline | null = null;
     Observer.create({
       target: window,
       type: 'wheel,touch',
       onChangeY(self) {
+        const tl = globalState.heroLoopTl;
+        if (!tl) return;
         const sentido = self.deltaY < 0 ? -1 : 1;
-        gsap.timeline({ defaults: { ease: 'none' } })
+        rafaga?.kill();
+        rafaga = gsap.timeline({ defaults: { ease: 'none' } })
           .to(tl, { timeScale: sentido * RAFAGA, duration: 0.3, overwrite: true })
           .to(tl, { timeScale: sentido, duration: 1 }, '+=0.3');
       },

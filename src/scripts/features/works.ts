@@ -251,6 +251,21 @@ export function setupWorks() {
   }
   measureLoops();
 
+  /* montar el sitio con un filtro puesto deja el escenario en display:none, y
+     ahí scrollWidth es cero: sin largo de bucle el tick se salta la pista y el
+     carrusel se queda quieto aunque le devuelvan la cuerda. Se vuelve a medir
+     en el resize que dispara quitarFiltro, cuando ya hay ancho.
+
+     Solo si alguna pista quedó sin largo: cambiarlo con el carrusel andando
+     mueve el punto donde da la vuelta, y eso se ve como un salto */
+  window.addEventListener(
+    'resize',
+    () => {
+      if (state.some((s) => !s.loop)) measureLoops();
+    },
+    { signal: globalState.abort.signal },
+  );
+
   let velocity = 0;
   globalState.lenis?.on('scroll', (e: { velocity: number }) => {
     velocity = e.velocity;
