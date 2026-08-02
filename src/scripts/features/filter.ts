@@ -7,7 +7,14 @@ import { idiomaActual } from '../idioma';
 import { reduced } from '../utils/dom';
 import { ejecutarGlimmTransition } from '../utils/glimm';
 
-const COLORES_TITULO = ['#ff4d8d', '#7b61ff', '#0ae448', '#0a0a0a'];
+const COLORES_TITULO = ['#ff4d8d', '#7b61ff', '#0ae448'];
+
+/** cuántas letras pueden estar encendidas a la vez, y cada cuánto se enciende
+ *  otra. Con varias solapadas el título se ve como en la cascada de antes
+ *  (dos o tres colores conviviendo), pero sin que ninguna se quede quieta */
+const ENCENDIDAS_MAX = 3;
+const ESPERA_MIN = 0.35;
+const ESPERA_MAX = 0.7;
 
 export function pintarTituloFiltro(titulo: HTMLElement, texto: string) {
   globalState.filterTitleTl?.kill();
@@ -17,26 +24,57 @@ export function pintarTituloFiltro(titulo: HTMLElement, texto: string) {
   titulo.textContent = '';
   titulo.setAttribute('aria-label', palabra);
 
-  const letras = palabra.split('').map((letra) => {
-    const span = document.createElement('span');
-    span.textContent = letra;
-    span.setAttribute('aria-hidden', 'true');
-    span.style.display = 'inline-block';
-    span.style.cursor = 'pointer';
+  /* el color de reposo se lee de la hoja antes de tocar ninguna letra, y todas
+     las animaciones arrancan de él con un fromTo.
 
-    span.addEventListener('pointerenter', () => {
-      const color = COLORES_TITULO[Math.floor(Math.random() * COLORES_TITULO.length)];
-      gsap.to(span, {
-        color: color,
+     Ese es el arreglo de las letras que se quedaban fijas de color: un yoyo
+     vuelve al valor con el que arrancó, y arrancaban de "lo que la letra tenga
+     puesto ahora". Si el destello caía sobre una letra a medio encender (o se
+     pasaba el ratón por encima de una), el tween nuevo tomaba ese color a
+     medias como origen y volvía a él en vez de al negro: ahí se quedaba, y como
+     el color pegado era el origen del siguiente, no había forma de salir */
+  const reposo = getComputedStyle(titulo).color;
+  const encendidas = new Set<HTMLElement>();
+
+  /** deja la letra como la deja la hoja: sin color ni transform propios */
+  const apagar = (letra: HTMLElement) => {
+    encendidas.delete(letra);
+    gsap.set(letra, { clearProps: 'color,transform' });
+  };
+
+  /** el rebote del ratón: sube, se pinta y vuelve exactamente a como estaba,
+   *  tanto si termina como si otra animación la pisa por el camino */
+  function saltar(letra: HTMLElement) {
+    const color = COLORES_TITULO[Math.floor(Math.random() * COLORES_TITULO.length)];
+    gsap.fromTo(
+      letra,
+      { color: reposo, yPercent: 0, scale: 1 },
+      {
+        color,
         yPercent: -14,
         scale: 1.08,
-        duration: 0.2,
+        duration: 0.22,
         ease: 'power2.out',
         yoyo: true,
         repeat: 1,
         overwrite: 'auto',
-      });
-    });
+        onComplete: () => apagar(letra),
+        onInterrupt: () => apagar(letra),
+      },
+    );
+    // después de crear el tween: el pisado (y con él el onInterrupt del tween
+    // anterior, que borra la letra del conjunto) ocurre dentro del fromTo
+    encendidas.add(letra);
+  }
+
+  const letras = palabra.split('').map((caracter) => {
+    const span = document.createElement('span');
+    span.textContent = caracter;
+    span.setAttribute('aria-hidden', 'true');
+    span.style.display = 'inline-block';
+    span.style.cursor = 'pointer';
+
+    span.addEventListener('pointerenter', () => saltar(span));
 
     titulo.appendChild(span);
     return span;
@@ -48,24 +86,45 @@ export function pintarTituloFiltro(titulo: HTMLElement, texto: string) {
 
   let colorIndex = 0;
 
-  function animarLetraAleatoria() {
-    const letra = gsap.utils.random(letras);
-    const color = COLORES_TITULO[colorIndex % COLORES_TITULO.length];
-    colorIndex++;
-
-    gsap.to(letra, {
-      color: color,
-      duration: 0.45,
-      yoyo: true,
-      repeat: 1,
-      ease: 'sine.inOut',
-      overwrite: 'auto',
+  function destellar() {
+    /* red de seguridad: si algo dejó color pegado en una letra que ya no está
+       encendida y no tiene ninguna animación corriendo (un tween cortado a
+       destiempo, un remontaje a media animación), se borra acá */
+    letras.forEach((letra) => {
+      if (encendidas.has(letra) || !letra.style.color || gsap.isTweening(letra)) return;
+      gsap.set(letra, { clearProps: 'color,transform' });
     });
 
-    globalState.filterTitleTl = gsap.delayedCall(0.9, animarLetraAleatoria) as any;
+    const apagadas = letras.filter((letra) => !encendidas.has(letra));
+    if (apagadas.length && encendidas.size < ENCENDIDAS_MAX) {
+      const letra = gsap.utils.random(apagadas);
+      const color = COLORES_TITULO[colorIndex % COLORES_TITULO.length];
+      colorIndex++;
+
+      gsap.fromTo(
+        letra,
+        { color: reposo },
+        {
+          color,
+          duration: 0.55,
+          yoyo: true,
+          repeat: 1,
+          ease: 'sine.inOut',
+          overwrite: 'auto',
+          onComplete: () => apagar(letra),
+          onInterrupt: () => apagar(letra),
+        },
+      );
+      encendidas.add(letra);
+    }
+
+    globalState.filterTitleTl = gsap.delayedCall(
+      gsap.utils.random(ESPERA_MIN, ESPERA_MAX),
+      destellar,
+    ) as any;
   }
 
-  animarLetraAleatoria();
+  destellar();
 }
 
 /** el rótulo de un filtro en el idioma activo. "all" no es una categoría del

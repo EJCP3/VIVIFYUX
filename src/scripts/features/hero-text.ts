@@ -50,7 +50,15 @@ export function setupSlotText() {
         stagger: { each: paso, from: 'start' },
         yoyo: true,
         repeat: 1,
-        overwrite: true,
+        // 'auto' y no true: true se lleva por delante cualquier tween de las
+        // letras, incluido el barrido de color del glitch, que se quedaba
+        // congelado a mitad. 'auto' solo pisa las propiedades que chocan
+        overwrite: 'auto',
+        // si el salto se corta a medias (otro salto encima, un remontaje), las
+        // letras vuelven a su sitio en vez de quedarse levantadas
+        onInterrupt: () => {
+          gsap.set(letras, { yPercent: 0, scaleY: 1 });
+        },
       }
     );
   }
