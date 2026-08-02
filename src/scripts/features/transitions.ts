@@ -1,10 +1,15 @@
 import { globalState } from '../state';
+import { tarjetasDelFiltro } from './filter';
 
 export type CatalogState = {
   from: string;
   historyIndex: number | null;
   vt: string | null;
   vtIndex: number | null;
+  /** la categoría que estaba puesta, o null si se estaba viendo el catálogo
+   *  entero. Al volver, el HTML llega recién hecho del servidor y no se acuerda
+   *  de nada: sin esto la grilla filtrada se perdía y aparecías en la portada */
+  filter: string | null;
   carousel: (number | null)[];
   scaler: string;
   worksHeight: string;
@@ -46,6 +51,34 @@ function findTile(vt: string, index: number | null): HTMLElement | null {
 }
 
 function restoreCatalog(state: CatalogState) {
+  /* la categoría se devuelve marcando el enlace: setupFilterIsland ya sabe
+     arrancar con el filtro que encuentre puesto, así que el resto del trabajo
+     (título, rótulo de la isla, medidas) lo hace él al montar.
+
+     Pero la grilla se enciende ACÁ, a mano. Esto corre dentro del intercambio
+     de la view transition, y el navegador saca la foto "nueva" en cuanto ese
+     intercambio termina —bastante antes del astro:page-load que monta el
+     sitio—. Si el filtro se aplicara solo al montar, la foto se tomaría con la
+     grilla escondida y el carrusel a la vista: la tarjeta que lleva el nombre
+     de la transición no existiría en la foto y el morph no se vería */
+  if (state.filter) {
+    document.querySelectorAll('.menu-link').forEach((l) => l.classList.remove('is-active'));
+    document
+      .querySelector<HTMLElement>(`.menu-link[data-filter="${state.filter}"]`)
+      ?.classList.add('is-active');
+
+    const works = document.querySelector<HTMLElement>('.works');
+    if (works) {
+      works.classList.add('is-filtered');
+      works.style.height = 'auto';
+    }
+
+    const suyas = new Set(tarjetasDelFiltro(state.filter));
+    document.querySelectorAll<HTMLElement>('.filtered-grid .tile').forEach((tile) => {
+      tile.style.display = suyas.has(tile) ? '' : 'none';
+    });
+  }
+
   if (state.carousel) {
     const tracks = Array.from(document.querySelectorAll<HTMLElement>('.row__track'));
     tracks.forEach((track, i) => {
@@ -112,6 +145,8 @@ export function setupTransitionNames() {
           historyIndex: (window.history.state as { index?: number } | null)?.index ?? null,
           vt,
           vtIndex: vt && tile ? allTiles.indexOf(tile) : null,
+          filter:
+            document.querySelector<HTMLElement>('.menu-link.is-active')?.dataset.filter ?? null,
           carousel: tracks.map((track) => {
             const match = track.style.transform.match(/translate3d\(([-\d.]+)px/);
             return match ? parseFloat(match[1]) : null;

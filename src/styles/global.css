@@ -1076,6 +1076,23 @@ h4[class*="glitch"] .flair-circle {
   max-width: 46ch;
 }
 
+/* la letra chica de la librería: lo que hay que saber antes de usarla. Se
+   despega del cuerpo con una barra al costado en vez de una caja de color, que
+   en una ficha tan sobria gritaría más de lo que hace falta */
+.project__nota {
+  border-left: 2px solid var(--ink);
+  padding-left: 14px;
+  font-size: clamp(13px, 0.95vw, 15px);
+  font-weight: 500;
+  line-height: 1.5;
+  max-width: 46ch;
+}
+
+.project__nota-rotulo {
+  margin-bottom: 6px;
+  opacity: 0.55;
+}
+
 .chips {
   display: flex;
   flex-wrap: wrap;

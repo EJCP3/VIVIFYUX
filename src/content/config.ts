@@ -15,6 +15,17 @@ const librerias = defineCollection({
       es: z.string(),
     }),
     
+    /* algo que conviene saber ANTES de usarla y que no se deduce del sitio: una
+       contradicción entre su documentación y su paquete, un requisito que no
+       aparece en el hero, una limitación real. Opcional a propósito: si no hay
+       nada que avisar, no se pone y la ficha no muestra nada */
+    nota: z
+      .object({
+        en: z.string(),
+        es: z.string(),
+      })
+      .optional(),
+
     url: z.string().url(),
     npm: z.string().optional(),
     imagen: image(),

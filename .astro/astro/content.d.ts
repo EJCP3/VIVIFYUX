@@ -169,6 +169,13 @@ declare module 'astro:content' {
   collection: "librerias";
   data: InferEntrySchema<"librerias">
 } & { render(): Render[".md"] };
+"canvas-ui.md": {
+	id: "canvas-ui.md";
+  slug: "canvas-ui";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
 "cuelume.md": {
 	id: "cuelume.md";
   slug: "cuelume";
@@ -305,6 +312,13 @@ declare module 'astro:content' {
 "theme-toggle.md": {
 	id: "theme-toggle.md";
   slug: "theme-toggle";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
+"thinking-orbs.md": {
+	id: "thinking-orbs.md";
+  slug: "thinking-orbs";
   body: string;
   collection: "librerias";
   data: InferEntrySchema<"librerias">

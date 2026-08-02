@@ -133,6 +133,18 @@ export function pintarTituloFiltro(titulo: HTMLElement, texto: string) {
   destellar();
 }
 
+/** las tarjetas de la grilla que le tocan a un filtro; "all" se las lleva todas.
+ *
+ *  Vive suelta, fuera del montaje de la isla, porque la vuelta desde una ficha
+ *  necesita hacer la misma cuenta antes de que el sitio se monte */
+export function tarjetasDelFiltro(filter: string): HTMLElement[] {
+  const tarjetas = Array.from(document.querySelectorAll<HTMLElement>('.filtered-grid .tile'));
+  if (filter === 'all') return tarjetas;
+  return tarjetas.filter(
+    (tile) => tile.querySelector<HTMLElement>('.tile__cat')?.dataset.categoria === filter,
+  );
+}
+
 /** el rótulo de un filtro en el idioma activo. "all" no es una categoría del
  *  catálogo, tiene su propia entrada en el diccionario */
 /** los ScrollTrigger de la grilla apuntan a las tarjetas de un filtro concreto:
@@ -209,6 +221,13 @@ export function setupFilterIsland() {
            `top` de la hoja, justo debajo de la isla, y no en lo que quedara del
            yPercent con el que arranca el recorrido */
         gsap.set('.menu-panel', { yPercent: 0, y: 0, scale: 1 });
+        /* y el overlay se enciende a mano. En la línea de tiempo eso lo hace un
+           .set() en la posición 0, que solo se dibuja la primera vez que la
+           cabeza lo cruza: saltando con progress() no se vuelve a disparar, y
+           como al cerrar se fuerza a 'none', a partir del segundo ciclo el menú
+           se veía abierto pero los clics lo atravesaban y no se podía elegir
+           filtro */
+        gsap.set(overlay, { pointerEvents: 'auto' });
       } else tl.timeScale(1).play();
     } else if (reduced()) {
       tl.progress(0).pause();
@@ -280,12 +299,12 @@ export function setupFilterIsland() {
     globalState.lenis?.scrollTo(y, { immediate: true, force: true });
   }
 
-  /** las tarjetas que le tocan a un filtro; "all" se las lleva todas */
+  /** las del montaje, que son las mismas que cuenta tarjetasDelFiltro: se filtra
+   *  sobre la lista ya capturada para no volver a recorrer el DOM en cada uso */
   function tilesDe(filter: string) {
     if (filter === 'all') return gridTiles;
-    return gridTiles.filter(
-      (tile) => tile.querySelector<HTMLElement>('.tile__cat')?.dataset.categoria === filter,
-    );
+    const suyas = new Set(tarjetasDelFiltro(filter));
+    return gridTiles.filter((tile) => suyas.has(tile));
   }
 
   /** enciende la grilla con un filtro puesto.

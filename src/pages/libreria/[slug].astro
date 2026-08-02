@@ -18,7 +18,7 @@ export async function getStaticPaths() {
 }
 
 const { lib, anterior, siguiente } = Astro.props;
-const { nombre, claim, descripcion, url, npm, categoria, imagen } = lib.data;
+const { nombre, claim, descripcion, nota, url, npm, categoria, imagen } = lib.data;
 
 /* claim y descripcion vienen del frontmatter como { en, es }: el HTML se pinta
    en el idioma base y el script cambia al otro con los data-en/data-es */
@@ -69,6 +69,14 @@ const etiqueta = CATEGORIAS[categoria];
       <p class="project__desc" data-en={descripcion.en} data-es={descripcion.es}>
         {descripcion[L]}
       </p>
+
+      {/* solo si la librería la trae: es la letra chica que el sitio no cuenta */}
+      {nota && (
+        <aside class="project__nota">
+          <p class="meta project__nota-rotulo" data-i18n="ficha.nota">{t('ficha.nota', L)}</p>
+          <p data-en={nota.en} data-es={nota.es}>{nota[L]}</p>
+        </aside>
+      )}
 
       <div>
         <p class="meta" style="opacity:0.55;margin-bottom:12px;" data-i18n="ficha.categoria">
