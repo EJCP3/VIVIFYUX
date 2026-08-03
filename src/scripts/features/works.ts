@@ -7,6 +7,12 @@ import { ejecutarGlimmTransition } from '../utils/glimm';
 
 const BOOST_MAX = 3.5;
 
+/* cuánto scroll ocupa la zona del carrusel, medido en alturas de ventana. La
+   primera se la queda el sticky, así que el recorrido real —lo que hay que
+   bajar para atravesar la zona— es este número menos uno. */
+const LARGO_ZONA = 2.5;
+const LARGO_ZONA_MOVIL = 2;
+
 export function setupWorks() {
   const works = document.querySelector<HTMLElement>('.works');
   const stage = document.querySelector<HTMLElement>('.works__stage');
@@ -95,7 +101,7 @@ export function setupWorks() {
     shiftTo = scaleTo * (contentH / 2 - medioFinal);
 
     if (!works!.classList.contains('is-filtered')) {
-      works!.style.height = `${Math.round(vh * (movil ? 3 : 4))}px`;
+      works!.style.height = `${Math.round(vh * (movil ? LARGO_ZONA_MOVIL : LARGO_ZONA))}px`;
     }
     apply();
   }

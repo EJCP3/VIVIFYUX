@@ -218,6 +218,13 @@ declare module 'astro:content' {
   collection: "librerias";
   data: InferEntrySchema<"librerias">
 } & { render(): Render[".md"] };
+"itshover.md": {
+	id: "itshover.md";
+  slug: "itshover";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
 "lenis.md": {
 	id: "lenis.md";
   slug: "lenis";

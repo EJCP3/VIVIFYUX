@@ -1,3 +1,9 @@
+/* Las tipografías viajan con el bundle (self-hosted): sin salto a un CDN
+   ajeno antes de poder pintar texto. Nunito es la variable, así que los
+   cinco pesos que usamos salen de un único archivo. */
+@import '@fontsource-variable/nunito/index.css';
+@import '@fontsource/bebas-neue/index.css';
+
 /* =========================================================
    VivifyUX — sistema editorial monocromo
    Blanco, negro, tipografía gigante vs. UI diminuta.
@@ -12,7 +18,7 @@
   --line: #e7e7e7;
 
   --font-display: "Bebas Neue", "Arial Narrow", sans-serif;
-  --font-body: "Nunito", -apple-system, "Segoe UI", sans-serif;
+  --font-body: "Nunito Variable", "Nunito", -apple-system, "Segoe UI", sans-serif;
 
   --pad: clamp(16px, 2.4vw, 40px);
   --gap-section: clamp(64px, 9vw, 130px);
@@ -1168,8 +1174,13 @@ h4[class*="glitch"] .flair-circle {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  /* el claim se queda: en teléfono es lo único que dice de qué va el sitio
+     antes de que el carrusel arranque. Se aprieta un punto para no empujar al
+     selector de idioma más abajo de lo necesario */
   .header-claim {
-    display: none;
+    font-size: 9px;
+    letter-spacing: 0.05em;
+    line-height: 1.25;
   }
 
   .section__inner {

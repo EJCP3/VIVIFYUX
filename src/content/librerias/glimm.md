@@ -11,7 +11,6 @@ nota:
   en: "Its site presents it as a React and Next.js library, but the published package documents a third entry point: a framework-agnostic core driven straight from vanilla JS with createShader and playSweep, where react and next are optional peer dependencies you never install. This very site runs on that core."
   es: "Su sitio la presenta como una biblioteca de React y Next.js, pero el paquete publicado documenta una tercera entrada: un núcleo agnóstico que se maneja directo desde JS vanilla con createShader y playSweep, donde react y next son dependencias opcionales que nunca instalás. Este mismo sitio funciona con ese núcleo."
 url: "https://glimm.dev/"
-npm: "glimm"
 imagen: "../../assets/glimm.webp"
 orden: 7
 ---

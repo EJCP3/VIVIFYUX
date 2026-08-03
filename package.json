@@ -6,9 +6,12 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "libreria": "node scripts/nueva-libreria.mjs"
+    "libreria": "node scripts/nueva-libreria.mjs",
+    "og": "node scripts/captura-og.mjs"
   },
   "dependencies": {
+    "@fontsource-variable/nunito": "^5.3.0",
+    "@fontsource/bebas-neue": "^5.3.0",
     "astro": "^4.16.0",
     "cuelume": "^0.2.1",
     "glimm": "^0.3.0",

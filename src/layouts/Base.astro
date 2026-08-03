@@ -19,6 +19,14 @@ const {
 
 const anio = new Date().getFullYear();
 const L = IDIOMA_BASE;
+
+/* Las tarjetas que arman Google, WhatsApp, X y compañía se leen sin ejecutar
+   JS, así que van en IDIOMA_BASE —el idioma con el que se sirve el HTML— y no
+   en el que elija después quien visite. Las tres URL tienen que ser absolutas:
+   una ruta relativa en og:image la ignoran casi todos. `site` sale de
+   astro.config.mjs. La imagen la genera scripts/captura-og.mjs */
+const canonica = new URL(Astro.url.pathname, Astro.site);
+const imagenSocial = new URL('/og.jpg', Astro.site);
 ---
 
 <!doctype html>
@@ -47,13 +55,27 @@ const L = IDIOMA_BASE;
     {/* los dos idiomas viajan en el propio <title>: el script cambia document.title sin pedir nada al servidor */}
     <title data-titulo-en={title.en} data-titulo-es={title.es}>{title[L]}</title>
     <meta name="description" content={description[L]} data-i18n-attr="content" data-en={description.en} data-es={description.es} />
-    <link rel="preconnect" href="https://api.fontshare.com" />
+    <link rel="canonical" href={canonica.href} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="VivifyUX" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="es_ES" />
+    <meta property="og:url" content={canonica.href} />
+    <meta property="og:title" content={title[L]} />
+    <meta property="og:description" content={description[L]} />
+    <meta property="og:image" content={imagenSocial.href} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={TEXTOS['sitio.titulo'][L]} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title[L]} />
+    <meta name="twitter:description" content={description[L]} />
+    <meta name="twitter:image" content={imagenSocial.href} />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://api.fontshare.com/v2/css?f[]=bebas-neue@400&f[]=nunito@400,500,600,700,800&display=swap"
-    />
     <ViewTransitions />
   </head>
   <body>

@@ -11,7 +11,6 @@ nota:
   en: "It only ships as a React component: the published API is <ThinkingOrb />, with no vanilla entry point. In exchange it comes house-trained — every instance pauses off-screen and while the tab is hidden, all of them share one clock, and prefers-reduced-motion draws a single static frame instead of the animation."
   es: "Se publica solo como componente de React: la API es <ThinkingOrb />, sin entrada para vanilla. A cambio viene educada de fábrica: cada instancia se pausa fuera de pantalla y con la pestaña oculta, todas comparten un mismo reloj, y con prefers-reduced-motion dibuja un fotograma fijo en vez de la animación."
 url: "https://orbs.jakubantalik.com/"
-npm: "thinking-orbs"
 imagen: "../../assets/thinking-orbs.webp"
 orden: 29
 ---

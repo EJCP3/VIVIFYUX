@@ -1,6 +1,6 @@
 ---
 nombre: "deltached"
-categoria: "transitions"
+categoria: "components"
 claim:
   en: "Shared-element morphing that survives being interrupted."
   es: "Transiciones de elemento compartido que sobreviven a una interrupción."
