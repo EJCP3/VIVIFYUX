@@ -24,13 +24,29 @@ export type Par = Record<Idioma, string>;
 
 /* --- textos sueltos de la interfaz. La clave se usa tal cual en data-i18n --- */
 export const TEXTOS = {
+  /* Se reparte el trabajo con la descripción en vez de repetirlo: el título
+     dice qué vas a hacer acá, la descripción dice qué hay dentro. Decían las
+     dos "un directorio de librerías de interacción" y en el resultado de
+     búsqueda salían una encima de otra.
+
+     "Brings it to life" no es una frase suelta: vivify es justamente eso, así
+     que el título termina explicando el nombre del sitio */
   'sitio.titulo': {
-    en: 'VivifyUX — A directory of interactive web libraries',
-    es: 'VivifyUX — Un directorio de librerías web interactivas',
+    en: 'VivifyUX — Find the library that brings it to life',
+    es: 'VivifyUX — Encuentra la librería que le da vida',
   },
   'sitio.descripcion': {
     en: 'A curated directory of interaction libraries for the web: scroll, text, transitions, effects, sound, and animation engines.',
     es: 'Un directorio curado de librerías de interacción para la web: scroll, texto, transiciones, efectos, sonido y motores de animación.',
+  },
+
+  /* describe la tarjeta de public/og.jpg —el logotipo y el claim del pie—, que
+     es siempre la misma imagen. No es el título de la página: un alt tiene que
+     contar lo que se ve, y quien lo escucha con un lector de pantalla ya oyó
+     el título justo antes */
+  'og.alt': {
+    en: 'The VivifyUX logo next to the line: your love for the web, in an instant.',
+    es: 'El logotipo de VivifyUX junto a la frase: tu amor por la web, en un instante.',
   },
 
   /* el salto de línea va como \n y lo dibuja white-space: pre-line, así el
