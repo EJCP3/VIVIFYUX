@@ -29,6 +29,14 @@ const librerias = defineCollection({
     url: z.string().url(),
     npm: z.string().optional(),
     imagen: image(),
+
+    /* clip mudo en loop que reemplaza la miniatura estática cuando el efecto
+       de la librería se explica mejor en movimiento que en una captura sola.
+       Vive en public/videos/ —no en src/assets/— porque el pipeline de
+       `image()` no procesa video; va la ruta tal cual. Opcional a propósito:
+       la mayoría de las fichas se queda con la imagen sola */
+    video: z.string().optional(),
+
     orden: z.number(),
   }),
 });

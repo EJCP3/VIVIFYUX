@@ -351,7 +351,13 @@ export function setupFilterIsland() {
     if (!animar) {
       // esto es un remontaje (cambio de idioma): las tarjetas ya estaban a la
       // vista, volver a esconderlas para reanimarlas se vería como un parpadeo
-      gsap.set(visibles, { autoAlpha: 1, y: 0 });
+      //
+      // clearProps del transform, no solo el `y`: aunque `y:0` se vea igual
+      // que no tener transform, GSAP lo escribe como translate(0,0) inline —
+      // y una tarjeta con ESE video flotante adentro (position:fixed) toma
+      // ese transform como su containing block y deja de seguir al cursor,
+      // se queda pegada dentro de la tarjeta en vez de la ventana
+      gsap.set(visibles, { autoAlpha: 1, y: 0, clearProps: 'transform' });
       return;
     }
 
@@ -373,6 +379,12 @@ export function setupFilterIsland() {
           stagger: 0.09,
           ease: 'sine.out',
           overwrite: true,
+          // mismo motivo que arriba: sin esto la tarjeta queda con un
+          // translate(0,0) puesto para siempre y su video flotante deja de
+          // ser fixed-a-la-ventana
+          onComplete() {
+            gsap.set(this.targets(), { clearProps: 'transform' });
+          },
         }),
       // sin onLeaveBack: una vez que entró se queda, volver a subir no la rebobina
     });

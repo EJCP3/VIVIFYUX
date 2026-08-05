@@ -1033,6 +1033,25 @@ h4[class*="glitch"] .flair-circle {
   object-fit: cover;
 }
 
+/* el clip que sigue al cursor en la ficha: fixed y pointer-events:none, así
+   nunca se interpone al click sobre el título, el CTA o la imagen que lo
+   disparan. hover-preview.ts lo mueve con quickTo y lo muestra con autoAlpha;
+   acá solo van tamaño y el estado de reposo (oculto de las dos formas a la
+   vez —opacity Y visibility— porque autoAlpha lee la segunda al arrancar) */
+.hover-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: min(360px, 42vw);
+  aspect-ratio: 16 / 11;
+  object-fit: contain;
+  background: var(--ink);
+  z-index: 55;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .project__panel {
   position: relative;
   display: flex;

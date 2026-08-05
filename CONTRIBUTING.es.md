@@ -73,6 +73,24 @@ minúsculas y sin espacios (`slot-text`, `gsap`, `border-beam`). Tambien puede e
   imagen con `object-fit: cover`, y la ficha es casi cuadrada, así que **recorta
   por los costados**. Dejá lo importante hacia el centro.
 
+#### Opcional: un mini video
+
+La mayoría de las fichas solo necesita la captura. Pero si lo que hace a la
+librería es algo en movimiento -un morph, una transición con física, un efecto
+que una imagen fija no vende- podés sumar un clip corto y mudo encima. Se
+muestra al pasar el mouse, tanto en la tarjeta de la grilla como en la ficha;
+la captura se queda como la imagen real, no como un placeholder, así que si no
+lo agregás no rompe nada.
+
+- Guardalo en `public/videos/<slug>.webm`, **no** en `src/assets/` -el video no
+  pasa por el pipeline de imágenes que usa `imagen`.
+- Formato **WebM (VP9)**, mudo, sin pista de audio. Con unos segundos en loop
+  alcanza; que pese poco, menos de ~150 KB es normal para un clip corto de UI.
+- Referencialo desde el frontmatter con `video: "/videos/<slug>.webm"` (ver la
+  tabla de campos más abajo).
+- Es la excepción, no la regla: sumalo solo cuando el movimiento sea la razón
+  real por la que la librería vale la pena, no en cada alta.
+
 ### 3. Crear la ficha
 
 Un archivo por librería en `src/content/librerias/<slug>.md`. El nombre del
@@ -98,7 +116,6 @@ tips:
   - en: "State machines replace timeline scrubbing — drive them with inputs, not with seek()."
     es: "Las máquinas de estado reemplazan el barrido de la línea de tiempo: movelas con inputs, no con seek()."
 url: "https://rive.app"
-npm: "@rive-app/canvas"
 imagen: "../../assets/rive.webp"
 orden: 11
 ---
@@ -118,6 +135,7 @@ corresponde, `npm run dev` te lo dice con el nombre del campo.
 | `url` | URL completa | Sí | Sitio oficial; si no tiene, el repositorio. Con `https://`. |
 | `npm` | texto | No | Nombre exacto del paquete, tal cual se instala. Omitilo si no se publica en npm. |
 | `imagen` | ruta | Sí | Siempre `../../assets/<slug>.webp`. |
+| `video` | ruta | No | `/videos/<slug>.webm`. Solo para la ficha excepcional donde un clip corto explica más que la captura; la mayoría no lo tiene. |
 | `orden` | número | Sí | Posición en la grilla y en el anterior/siguiente. Usá el siguiente número libre. |
 
 ### 4. Probar antes de mandar

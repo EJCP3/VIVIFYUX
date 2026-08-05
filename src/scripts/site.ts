@@ -14,6 +14,7 @@ import { setupFilterIsland } from './features/filter';
 import { setupProjectView } from './features/project-view';
 import { setupFooterReveal, setupVolverArriba } from './features/footer';
 import { setupMotionToggle } from './features/motion';
+import { setupHoverPreview } from './features/hover-preview';
 
 gsap.registerPlugin(ScrollTrigger, Observer);
 
@@ -34,6 +35,7 @@ export function initSite() {
   setupFooterReveal();
   setupVolverArriba();
   setupFilterIsland();
+  setupHoverPreview();
   // el interruptor de animaciones remonta todo: se pasa initSite a sí misma
   setupMotionToggle(initSite);
   ScrollTrigger.refresh();

@@ -59,6 +59,15 @@ Save an image in `src/assets/<slug>.webp`, where `<slug>` is the name in lowerca
 - **What to capture**: the cover of the library or its demo, as it is seen. No browser bar, no cursor, no added frames or shadows.
 - **Composition**: both the grid card and the detail card crop the image with `object-fit: cover`, and the detail card is almost square, so **it crops from the sides**. Leave the important part towards the center.
 
+#### Optional: a mini video
+
+Most cards only need the screenshot. But if the whole point of the library is something in motion - a morph, a physics-based transition, an effect a still image can't sell - you can add a short muted clip on top of it. It shows on hover, both on the grid card and on the detail page; the screenshot stays as the real image, not a placeholder, so leaving it out breaks nothing.
+
+- Save it in `public/videos/<slug>.webm`, **not** `src/assets/` - video doesn't go through the image pipeline that `imagen` does.
+- Format **WebM (VP9)**, muted, no audio track needed. A few seconds looping is enough; keep it light, under ~150 KB is normal for a short UI clip.
+- Reference it from the frontmatter with `video: "/videos/<slug>.webm"` (see the field table below).
+- It's the exception, not the rule: add one only when the motion is the actual reason the library is worth including, not on every submission.
+
 ### 3. Create the card
 
 One file per library in `src/content/librerias/<slug>.md`. The name of the file is the URL: `slot-text.md` → `/libreria/slot-text/`.
@@ -81,7 +90,6 @@ tips:
   - en: "State machines replace timeline scrubbing — drive them with inputs, not with seek()."
     es: "Las máquinas de estado reemplazan el barrido de la línea de tiempo: movelas con inputs, no con seek()."
 url: "https://rive.app"
-npm: "@rive-app/canvas"
 imagen: "../../assets/rive.webp"
 orden: 11
 ---
@@ -99,6 +107,7 @@ The fields are validated in [`src/content/config.ts`](src/content/config.ts): if
 | `url` | full URL | Yes | Official site; if none, the repository. With `https://`. |
 | `npm` | text | No | Exact name of the package, as installed. Omit if not published on npm. |
 | `imagen` | path | Yes | Always `../../assets/<slug>.webp`. |
+| `video` | path | No | `/videos/<slug>.webm`. Only for the rare card where a short clip explains it better than the screenshot; most entries don't have one. |
 | `orden` | number | Yes | Position in the grid and in prev/next. Use the next free number. |
 
 ### 4. Test before submitting

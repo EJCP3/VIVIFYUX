@@ -8,15 +8,41 @@ interface Props {
   nombre: string;
   categoria: Categoria;
   imagen: ImageMetadata;
+  video?: string;
   isCopy?: boolean;
 }
 
-const { slug, nombre, categoria, imagen, isCopy = false } = Astro.props;
+const { slug, nombre, categoria, imagen, video, isCopy = false } = Astro.props;
 const L = IDIOMA_BASE;
 const etiqueta = CATEGORIAS[categoria];
 ---
 
-<a class="tile" href={`/libreria/${slug}/`} data-vt={`cover-${slug}`} data-copy={isCopy ? "true" : undefined}>
+<a
+  class="tile"
+  href={`/libreria/${slug}/`}
+  data-vt={`cover-${slug}`}
+  data-copy={isCopy ? "true" : undefined}
+  data-hover-trigger={video ? true : undefined}>
+  {/* mismo mecanismo que la ficha: la miniatura de abajo nunca se toca, esto
+      es un video aparte, `position:fixed`, que hover-preview.ts posiciona en
+      el cursor y muestra mientras el mouse está sobre esta tarjeta. Va
+      adentro del <a> solo para que el propio JS lo encuentre por cercanía
+      (`tile.querySelector`) — la tarjeta no tiene ningún transform que le
+      cambie el containing block, así que el fixed sigue siendo relativo a la
+      ventana igual */}
+  {video && (
+    <video
+      class="hover-video"
+      data-hover-video
+      data-src={video}
+      muted
+      loop
+      playsinline
+      preload="none"
+      disablepictureinpicture
+      aria-hidden="true"
+    />
+  )}
   <div class="tile__media">
     <!-- espejo de --tile-w en global.css: la tarjeta se maqueta al tamaño del
          zoom final, así que el `sizes` es el real y no hay que inflarlo.

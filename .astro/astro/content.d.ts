@@ -253,6 +253,13 @@ declare module 'astro:content' {
   collection: "librerias";
   data: InferEntrySchema<"librerias">
 } & { render(): Render[".md"] };
+"morphicons.md": {
+	id: "morphicons.md";
+  slug: "morphicons";
+  body: string;
+  collection: "librerias";
+  data: InferEntrySchema<"librerias">
+} & { render(): Render[".md"] };
 "motion-core.md": {
 	id: "motion-core.md";
   slug: "motion-core";

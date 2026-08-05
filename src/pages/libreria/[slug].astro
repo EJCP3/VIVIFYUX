@@ -18,7 +18,7 @@ export async function getStaticPaths() {
 }
 
 const { lib, anterior, siguiente } = Astro.props;
-const { nombre, claim, descripcion, nota, url, npm, categoria, imagen } = lib.data;
+const { nombre, claim, descripcion, nota, url, npm, categoria, imagen, video } = lib.data;
 
 /* claim y descripcion vienen del frontmatter como { en, es }: el HTML se pinta
    en el idioma base y el script cambia al otro con los data-en/data-es */
@@ -31,7 +31,27 @@ const etiqueta = CATEGORIAS[categoria];
   description={claim}
   chrome={false}>
   <article class="project">
-    <div class="project__media">
+    {/* el clip que sigue al cursor. Uno solo para los tres disparadores de
+        abajo —título, CTA e imagen— porque los tres apuntan al mismo video;
+        `position:fixed` + pointer-events:none para que nunca tape el click
+        al elemento real que está debajo. setupHoverPreview() lo mueve y lo
+        apaga de una al primer click en cualquier parte, para que no quede
+        pisando la transición de salida (era el bug de la vuelta anterior) */}
+    {video && (
+      <video
+        class="hover-video"
+        data-hover-video
+        data-src={video}
+        muted
+        loop
+        playsinline
+        preload="none"
+        disablepictureinpicture
+        aria-hidden="true"
+      />
+    )}
+
+    <div class="project__media" data-hover-trigger={video ? true : undefined}>
       {/* la imagen va recortada a pantalla completa (object-fit: cover) sobre una
           caja casi cuadrada, y las capturas son apaisadas 1.9:1 — el navegador
           la estira hasta ~1.9 veces el alto del hueco. Por eso `sizes` declara
@@ -90,7 +110,7 @@ const etiqueta = CATEGORIAS[categoria];
       <div class="project__rule"></div>
 
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;">
-        <a class="project__cta meta" href={url} target="_blank" rel="noopener">
+        <a class="project__cta meta" href={url} target="_blank" rel="noopener" >
           <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path d="M6 2H2v12h12v-4M10 2h4v4M14 2L7 9" stroke="currentColor" stroke-width="1.6"></path>
           </svg>
