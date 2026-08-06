@@ -1,6 +1,6 @@
 ---
 nombre: "Theme Toggle"
-categoria: "components"
+categoria: "effects"
 claim: 
   en: "A dark-mode switch that wipes the screen to prove it."
   es: "Un interruptor de modo oscuro que barre la pantalla para demostrarlo."
